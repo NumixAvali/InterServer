@@ -5,8 +5,7 @@ public enum JsonRequestType : ushort
 	Get = 0,
 	Test = 1
 }
-// This fucking sucks, I hate it!
-//TODO: come up with something else
+
 public enum ResponseType : ushort
 {
 	IncorrectJson = 0,
@@ -18,11 +17,17 @@ public enum ResponseType : ushort
 }
 
 
-public class GetJson
+public class RequestJson
 {
 	public bool? ForceRefresh { get; set; }
 	public string? Token { get; set; }
-	public ushort? RequestType { get; set; } 
+	public ResponseType RequestType { get; set; } 
+}
+
+public class ReplyJson
+{
+	public string message { get; set; }
+	public string? data { get; set; }
 }
 
 public class TestJsonData

@@ -49,31 +49,23 @@ public class RequestHandler
 		body.Close();
 		reader.Close();
 
-		
-		TestJsonData ?postObj = JsonSerializer.Deserialize<TestJsonData>(postData);
-
-		if (postObj != null)
-		{
-			Console.WriteLine($"And the same thing, but obj:\n{postObj.key1}\n{postObj.key2}");
-		}
+		RequestJson incomingJson = JsonSerializer.Deserialize<RequestJson>(postData)!;
+		// TestJsonData ?postObj = JsonSerializer.Deserialize<TestJsonData>(postData);
+		//
+		// if (postObj != null)
+		// {
+		// 	Console.WriteLine($"And the same thing, but obj:\n{postObj.key1}\n{postObj.key2}");
+		// }
 		
 		
 		// A thing for handling response text
-		ResponseManager(response, ResponseType.Ok);
+		ResponseManager(response, incomingJson.RequestType);
 	}
 
-	//TODO: implement this
-	private void ResponseManager(HttpListenerResponse response, ResponseType responseType, bool reject = false)
+	public void ResponseManager(HttpListenerResponse response, ResponseType responseType)
 	{
-		string responseStr;
+		string responseStr = "Internal error!";
 		
-		
-		
-		if (reject)
-		{
-			// TODO: make actual reject MSG
-			responseStr = "Rejected.";
-		}
 		const string sillyCat =
 			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
@@ -85,9 +77,48 @@ public class RequestHandler
 ⣿⡡⢟⡛⠻⠿⣿⣿⣿⣝⣨⣝⣡⣿⣿⡿⠿⠿⢟⣛⣫⣼⣿
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
-		responseStr = sillyCat;
 		
-		byte[] responseBytes = Encoding.UTF8.GetBytes(responseStr);
+		// This probably can be moved to JsonTypes.cs
+		Dictionary<ResponseType, string> responseMessages = new Dictionary<ResponseType, string>
+		{
+			{ ResponseType.Ok, sillyCat },
+			{ ResponseType.AuthReject, "Authorization error." },
+			{ ResponseType.IncorrectJson, "Malformed JSON provided." },
+			{ ResponseType.ServiceUnavailable, "Service temporary unavailable. Try again later." },
+			{ ResponseType.UnknownError, "Unknown server error. Try again later." },
+			{ ResponseType.Rejected, "Rejected." },
+		};
+
+		if (responseMessages.TryGetValue(responseType, out var message))
+		{
+			responseStr = message;
+		}
+
+
+		// This solution below isn't good.
+		ReplyJson reply;
+
+		if (responseType == ResponseType.Ok)
+		{
+			reply = new ReplyJson
+			{
+				message = responseStr,
+				data = GetJson()
+			};
+		}
+		else
+		{
+			reply = new ReplyJson
+			{
+				message = responseStr,
+				data = null
+			};
+		}
+		
+		
+
+		
+		byte[] responseBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(reply,new JsonSerializerOptions() { WriteIndented = true}) );
 		
 		
 		response.ContentLength64 = responseBytes.Length;
@@ -98,6 +129,18 @@ public class RequestHandler
 
 	private string GetJson()
 	{
-		return "NIY";
+		const string sillyCat =
+			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
+⣿⡿⣸⣿⣿⣿⣷⣮⣭⣛⣿⣿⣿⣿⣶⣥⣾⣿⣿⣿⡷⣽⣿
+⣿⡏⣾⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿
+⣿⣧⢻⣿⡟⣰⡿⠁⢹⣿⣿⣿⣋⣴⠖⢶⣝⢻⣿⣿⡇⣿⣿
+⠩⣥⣿⣿⣴⣿⣇⠀⣸⣿⣿⣿⣿⣷⠀⢰⣿⠇⣿⣭⣼⠍⣿
+⣿⡖⣽⣿⣿⣿⣿⣿⣿⣯⣭⣭⣿⣿⣷⣿⣿⣿⣿⣿⡔⣾⣿
+⣿⡡⢟⡛⠻⠿⣿⣿⣿⣝⣨⣝⣡⣿⣿⡿⠿⠿⢟⣛⣫⣼⣿
+⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
+⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
+
+		return sillyCat;
 	}
 }

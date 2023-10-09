@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterServer", "InterServer.csproj", "{3A585ECD-F4EF-4751-BF27-B3897B1DA47B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterServer", "InterServer.csproj", "{9A86002A-68C3-491A-909E-5C0E2D6788BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3A585ECD-F4EF-4751-BF27-B3897B1DA47B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A585ECD-F4EF-4751-BF27-B3897B1DA47B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A585ECD-F4EF-4751-BF27-B3897B1DA47B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A585ECD-F4EF-4751-BF27-B3897B1DA47B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A86002A-68C3-491A-909E-5C0E2D6788BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A86002A-68C3-491A-909E-5C0E2D6788BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A86002A-68C3-491A-909E-5C0E2D6788BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A86002A-68C3-491A-909E-5C0E2D6788BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
