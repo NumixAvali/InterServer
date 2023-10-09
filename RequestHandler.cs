@@ -8,6 +8,9 @@ public class RequestHandler
 {
 	public RequestHandler(HttpListenerRequest request, HttpListenerResponse response, bool dryRun = true) //
 	{
+		// Stop the logic, in case of artificial summon
+		if (request == null || response == null) return;
+
 		// Private method picker
 		switch (request.HttpMethod)
 		{
@@ -59,10 +62,10 @@ public class RequestHandler
 		
 		
 		// A thing for handling response text
-		ResponseManager(response, incomingJson.RequestType);
+		ResponseManager(incomingJson.RequestType);
 	}
 
-	public void ResponseManager(HttpListenerResponse response, ResponseType responseType)
+	private void ResponseManager(ResponseType responseType)
 	{
 		string responseStr = "Internal error!";
 		
@@ -121,13 +124,13 @@ public class RequestHandler
 		byte[] responseBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(reply,new JsonSerializerOptions() { WriteIndented = true}) );
 		
 		
-		response.ContentLength64 = responseBytes.Length;
-		response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
-		response.Close();
+		// response.ContentLength64 = responseBytes.Length;
+		// response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
+		// response.Close();
 	}
 	
 
-	private string GetJson()
+	public string GetJson()
 	{
 		const string sillyCat =
 			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿

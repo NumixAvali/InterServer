@@ -7,4 +7,8 @@
         <RootNamespace>InterServer</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    </ItemGroup>
+
 </Project>
