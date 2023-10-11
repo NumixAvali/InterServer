@@ -1,5 +1,4 @@
-﻿@using System.Text.Json
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
 }
 <style>
@@ -23,28 +22,5 @@
             @response.data
         }
     </p>
-    <button  onclick="refreshBtnClick()">Refresh</button>
+    <button class="btn-lg" onclick="refreshBtnClick()">Refresh</button>
 </div>
-
-<script>
-    $(document).ready(function () {
-        $("#refreshBtn").click(function () {
-            // $.ajax({
-            //     type: "POST",
-            //     url: "/ControllerName/ActionName",
-            //     success: function (data) {
-            //         // Handle the response from the server, e.g., update the UI.
-            //     },
-            //     error: function (error) {
-            //         // Handle errors, if any.
-            //     }
-            // });
-            alert("NIY.")
-        });
-    });
-    
-    function refreshBtnClick() {
-            // Your logic here
-            alert('Button clicked!');
-        }
-</script>
