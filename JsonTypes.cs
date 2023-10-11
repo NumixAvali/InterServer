@@ -16,6 +16,13 @@ public enum ResponseType : ushort
 	Rejected = 5
 }
 
+public enum ReplyDataType : ushort
+{
+	CurrentData = 0,
+	CachedData = 1,
+	NoData = 2
+}
+
 
 public class RequestJson
 {

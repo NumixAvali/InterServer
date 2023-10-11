@@ -6,27 +6,27 @@ namespace InterServer;
 
 public class RequestHandler
 {
-	public RequestHandler(HttpListenerRequest request, HttpListenerResponse response, bool dryRun = true) //
-	{
-		// Stop the logic, in case of artificial summon
-		if (request == null || response == null) return;
-
-		// Private method picker
-		switch (request.HttpMethod)
-		{
-			case "POST":
-			{
-				PostHandler(request, response);
-				break;
-			}
-			case "GET":
-			{
-				GetHandler(response);
-				break;
-			}
-		}
-		
-	}
+	// public RequestHandler(HttpListenerRequest request, HttpListenerResponse response, bool dryRun = true) //
+	// {
+	// 	// Stop the logic, in case of artificial summon
+	// 	if (request == null || response == null) return;
+	//
+	// 	// Private method picker
+	// 	switch (request.HttpMethod)
+	// 	{
+	// 		case "POST":
+	// 		{
+	// 			PostHandler(request, response);
+	// 			break;
+	// 		}
+	// 		case "GET":
+	// 		{
+	// 			GetHandler(response);
+	// 			break;
+	// 		}
+	// 	}
+	// 	
+	// }
 
 	private void GetHandler(HttpListenerResponse response)
 	{
@@ -65,10 +65,8 @@ public class RequestHandler
 		ResponseManager(incomingJson.RequestType);
 	}
 
-	private void ResponseManager(ResponseType responseType)
+	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData)
 	{
-		string responseStr = "Internal error!";
-		
 		const string sillyCat =
 			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
@@ -81,59 +79,54 @@ public class RequestHandler
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
 		
+		string responseStr = "Internal error!";
+
+		string dataResponse = sillyCat;
+
 		// This probably can be moved to JsonTypes.cs
 		Dictionary<ResponseType, string> responseMessages = new Dictionary<ResponseType, string>
 		{
-			{ ResponseType.Ok, sillyCat },
+			{ ResponseType.Ok, "Ok." },
 			{ ResponseType.AuthReject, "Authorization error." },
 			{ ResponseType.IncorrectJson, "Malformed JSON provided." },
 			{ ResponseType.ServiceUnavailable, "Service temporary unavailable. Try again later." },
 			{ ResponseType.UnknownError, "Unknown server error. Try again later." },
 			{ ResponseType.Rejected, "Rejected." },
 		};
-
+		
+		Dictionary<ReplyDataType, string> responseDataType = new Dictionary<ReplyDataType, string>
+		{
+			{ ReplyDataType.CachedData, GetCachedJson() },
+			{ ReplyDataType.CurrentData, GetJson() },
+			{ ReplyDataType.NoData, sillyCat },
+		};
+		
 		if (responseMessages.TryGetValue(responseType, out var message))
 		{
 			responseStr = message;
 		}
-
-
-		// This solution below isn't good.
-		ReplyJson reply;
-
-		if (responseType == ResponseType.Ok)
+		
+		if (responseDataType.TryGetValue(dataType, out var dataMessage))
 		{
-			reply = new ReplyJson
-			{
-				message = responseStr,
-				data = GetJson()
-			};
+			dataResponse = dataMessage;
 		}
-		else
+
+
+		var reply = new ReplyJson
 		{
-			reply = new ReplyJson
-			{
-				message = responseStr,
-				data = null
-			};
-		}
-		
-		
+			message = responseStr,
+			data = dataResponse
+		};
 
 		
-		byte[] responseBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(reply,new JsonSerializerOptions() { WriteIndented = true}) );
-		
-		
-		// response.ContentLength64 = responseBytes.Length;
-		// response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
-		// response.Close();
+		return reply;
 	}
 	
 
-	public string GetJson()
+	private string GetJson()
 	{
 		const string sillyCat =
-			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
 ⣿⡿⣸⣿⣿⣿⣷⣮⣭⣛⣿⣿⣿⣿⣶⣥⣾⣿⣿⣿⡷⣽⣿
 ⣿⡏⣾⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿
@@ -145,5 +138,23 @@ public class RequestHandler
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
 
 		return sillyCat;
+	}
+
+	private string GetCachedJson()
+	{
+		string otherSillyCat =
+@"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⡇⠀⠀⠘⠷⣀⠀⠀⠈⢻⢤⠶⠛⠉⢸⡇⠀⠀⠀⠀⠀⠀⠀
+⠀⠸⡁⠀⢀⣠⣄⠀⠀⠀⡀⣀⠀⠀⠀⠀⡾⠁⠀⠀⠀⠀⠀⠀⠀
+⢀⡀⣇⢰⡟⢰⣿⠀⠀⣼⡇⠈⠳⡄⠀⣰⠃⠀⠀⠀⠀⠀⠀⠀⠀
+⠙⢧⡀⠸⠀⢘⣛⡀⠀⠻⠇⠀⣰⠃⢚⣳⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠸⠵⠢⣄⣀⠈⣠⡀⠀⠀⠀⢉⣠⣿⡁⠀⠀⠀⠀⠀⠀⠀⡀⠀
+⠀⠀⠀⠀⢲⣟⠛⠀⠀⠀⠉⠉⣿⠃⠀⠀⠀⠀⠀⠀⠀⢀⠀⡏⢳
+⠀⠀⠀⠀⠠⢯⡀⠀⠀⠀⠀⠀⢼⠛⠀⠀⠀⠀⠀⠀⠀⢸⡦⠃⠘
+⠀⠀⠀⠀⠀⢸⡇⠀⠘⣾⠇⠀⠸⣦⠀⠀⠀⠀⠀⠀⠀⣰⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀";
+
+		return otherSillyCat;
 	}
 }

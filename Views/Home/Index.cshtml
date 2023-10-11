@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Text.Json
+@{
     ViewData["Title"] = "Home Page";
 }
 <style>
@@ -14,10 +15,36 @@
 
 <div class="align-content-lg-start">
     <h5>Current system state:</h5>
+    <p class="fst-italic">Here should be a graph with some cached data, taken from DB.</p>
     <p class="preserve-newlines">
         @{
-            string response = new RequestHandler(null, null).GetJson();
-            @response
+            var response =  new RequestHandler().ResponseManager(ResponseType.Ok,ReplyDataType.CachedData); //"Here should be a graph with some cached data, taken from DB.";
+            //JsonSerializer.Serialize(response)
+            @response.data
         }
     </p>
+    <button  onclick="refreshBtnClick()">Refresh</button>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $("#refreshBtn").click(function () {
+            // $.ajax({
+            //     type: "POST",
+            //     url: "/ControllerName/ActionName",
+            //     success: function (data) {
+            //         // Handle the response from the server, e.g., update the UI.
+            //     },
+            //     error: function (error) {
+            //         // Handle errors, if any.
+            //     }
+            // });
+            alert("NIY.")
+        });
+    });
+    
+    function refreshBtnClick() {
+            // Your logic here
+            alert('Button clicked!');
+        }
+</script>

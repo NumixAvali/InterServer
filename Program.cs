@@ -1,4 +1,6 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,16 @@ builder.Services.AddApiVersioning(opt =>
 		new HeaderApiVersionReader("x-api-version"),
 		new MediaTypeApiVersionReader("x-api-version"));
 });
+
+builder.Services.AddRateLimiter(_ => _
+	.AddFixedWindowLimiter(policyName: "fixed", options =>
+	{
+		options.PermitLimit = 4;
+		options.Window = TimeSpan.FromSeconds(12);
+		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+		options.QueueLimit = 2;
+	}));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,10 +48,6 @@ app.MapControllerRoute(
 	name: "default",
 	pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Not entirely sure, if this is needed. Routing works perfectly fine without it.
-app.UseEndpoints(endpoints =>
-{
-	endpoints.MapControllers();
-}).UseApiVersioning();
+app.UseRateLimiter();
 
 app.Run();
