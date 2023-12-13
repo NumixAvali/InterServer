@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 
@@ -125,7 +126,7 @@ public class RequestHandler
 
 	private string GetJson()
 	{
-		const string sillyCat =
+		string sillyCat =
 @"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
 ⣿⡿⣸⣿⣿⣿⣷⣮⣭⣛⣿⣿⣿⣿⣶⣥⣾⣿⣿⣿⡷⣽⣿
@@ -137,7 +138,51 @@ public class RequestHandler
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
 
-		return sillyCat;
+		const string inverterIp = "192.168.2.211";
+		const int inverterPort = 8899;
+		
+		// This should be done via proper configuration menu, not hardcoded.
+		// TODO: make a configuration menu for those
+		uint inverterSn = 2749279538;
+		int regStart1 = Convert.ToInt32("0x0003", 16);
+		int regEnd1 = Convert.ToInt32("0x0070", 16);
+		
+		int pini = regStart1;
+		int pfin = regEnd1;
+		// Data frame begin
+		byte[] start = { 0xA5 };
+		byte[] length = { 0x17, 0x00 }; 
+		byte[] controlCode = { 0x10, 0x45 };
+		byte[] serial = { 0x00, 0x00 };
+
+		// Blank data field
+		byte[] dataField = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+		string posIni = Convert.ToString(pini, 16).PadLeft(4, '0');
+		string posFin = Convert.ToString(pfin - pini + 1, 16).PadLeft(4, '0');
+
+		byte[] businessField = { 0x01, 0x03,
+			Convert.ToByte(posIni.Substring(0, 2), 16),
+			Convert.ToByte(posIni.Substring(2, 2), 16),
+			Convert.ToByte(posFin.Substring(0, 2), 16),
+			Convert.ToByte(posFin.Substring(2, 2), 16) };
+		
+		ushort crcValue = CalculateCrc16Modbus(businessField);
+		byte[] crc = { (byte)(crcValue & 0xFF), (byte)((crcValue >> 8) & 0xFF) };
+
+		byte[] checksum = { 0x00 }; // checksum F2
+		byte[] endCode = { 0x15 };
+
+		byte[] inverterSn2 = BitConverter.GetBytes(inverterSn);
+		Array.Reverse(inverterSn2);
+
+		// Construct the frame
+		byte[] frame = ConcatArrays(start, length, controlCode, serial, inverterSn2, dataField, businessField, crc, checksum, endCode);
+		
+		// Console.WriteLine(BitConverter.ToString(frame).Replace("-", " "));
+
+		
+		return BitConverter.ToString(frame).Replace("-", " "); // sillyCat;
 	}
 
 	private string GetCachedJson()
@@ -156,5 +201,45 @@ public class RequestHandler
 ⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀";
 
 		return otherSillyCat;
+	}
+	
+	private static ushort CalculateCrc16Modbus(byte[] data)
+	{
+		ushort crc = 0xFFFF;
+
+		foreach (byte b in data)
+		{
+			crc ^= b;
+
+			for (int i = 0; i < 8; i++)
+			{
+				if ((crc & 0x0001) != 0)
+				{
+					crc >>= 1;
+					crc ^= 0xA001;
+				}
+				else
+				{
+					crc >>= 1;
+				}
+			}
+		}
+
+		return crc;
+	}
+	
+	private static byte[] ConcatArrays(params byte[][] arrays)
+	{
+		int totalLength = arrays.Sum(array => array.Length);
+		byte[] result = new byte[totalLength];
+		int offset = 0;
+
+		foreach (var array in arrays)
+		{
+			Buffer.BlockCopy(array, 0, result, offset, array.Length);
+			offset += array.Length;
+		}
+
+		return result;
 	}
 }
