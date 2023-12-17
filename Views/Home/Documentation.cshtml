@@ -1,6 +1,30 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.Versioning
+@{
     ViewData["Title"] = "Documentation";
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Placeholder for API documentation.</p>
+<br/>
+
+<h4>1. Test Endpoint</h4>
+<p>
+    <strong>Endpoint:</strong> /api/v1/test<br>
+    <strong>Method:</strong> GET<br>
+    <strong>Description:</strong> This endpoint is for testing purposes.
+</p>
+
+<h4>2. Get Data Endpoint</h4>
+<p>
+    <strong>Endpoint:</strong> /api/v1/get-data<br>
+    <strong>Method:</strong> GET<br>
+    <strong>Description:</strong> This endpoint retrieves data from the server.
+</p>
+
+<h4>3. Get Cache Endpoint</h4>
+<p>
+    <strong>Endpoint:</strong> /api/v1/get-cache<br>
+    <strong>Method:</strong> GET<br>
+    <strong>Description:</strong> This endpoint retrieves data from the cache.
+</p>
+
+<!-- TODO: Add more endpoints as needed -->
