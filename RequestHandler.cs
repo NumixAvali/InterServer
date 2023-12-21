@@ -126,6 +126,7 @@ public class RequestHandler
 
 	private string GetJson()
 	{
+		const bool verbose = false;
 		string sillyCat =
 @"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
@@ -140,49 +141,66 @@ public class RequestHandler
 
 		const string inverterIp = "192.168.2.211";
 		const int inverterPort = 8899;
+
+		byte[] frame = ConstructFrame();
+		FrameInfo digestedInfo = new FrameInfo();
 		
-		// This should be done via proper configuration menu, not hardcoded.
-		// TODO: make a configuration menu for those
-		uint inverterSn = 2749279538;
-		int regStart1 = Convert.ToInt32("0x0003", 16);
-		int regEnd1 = Convert.ToInt32("0x0070", 16);
+
+		// if (verbose)
+		// {
+		// 	Console.WriteLine("Assembled frame:");
+		// 	Console.WriteLine(BitConverter.ToString(frame).Replace("-", " "));
+		// 	// Console.WriteLine(Convert.ToBase64String(frame));
+		//
+		// 	Console.WriteLine("Based string converted:");
+		// 	Console.WriteLine(BitConverter.ToString(unbased1).Replace("-", " "));
+		// 	// Console.WriteLine(Convert.ToBase64String(unbased1));
+		// }
 		
-		int pini = regStart1;
-		int pfin = regEnd1;
-		// Data frame begin
-		byte[] start = { 0xA5 };
-		byte[] length = { 0x17, 0x00 }; 
-		byte[] controlCode = { 0x10, 0x45 };
-		byte[] serial = { 0x00, 0x00 };
-
-		// Blank data field
-		byte[] dataField = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-		string posIni = Convert.ToString(pini, 16).PadLeft(4, '0');
-		string posFin = Convert.ToString(pfin - pini + 1, 16).PadLeft(4, '0');
-
-		byte[] businessField = { 0x01, 0x03,
-			Convert.ToByte(posIni.Substring(0, 2), 16),
-			Convert.ToByte(posIni.Substring(2, 2), 16),
-			Convert.ToByte(posFin.Substring(0, 2), 16),
-			Convert.ToByte(posFin.Substring(2, 2), 16) };
 		
-		ushort crcValue = CalculateCrc16Modbus(businessField);
-		byte[] crc = { (byte)(crcValue & 0xFF), (byte)((crcValue >> 8) & 0xFF) };
-
-		byte[] checksum = { 0x00 }; // checksum F2
-		byte[] endCode = { 0x15 };
-
-		byte[] inverterSn2 = BitConverter.GetBytes(inverterSn);
-		Array.Reverse(inverterSn2);
-
-		// Construct the frame
-		byte[] frame = ConcatArrays(start, length, controlCode, serial, inverterSn2, dataField, businessField, crc, checksum, endCode);
+		//TCP client
 		
-		// Console.WriteLine(BitConverter.ToString(frame).Replace("-", " "));
+		using (TcpClient tcpClient = new TcpClient())
+		{
+			try
+			{
+				tcpClient.Connect(inverterIp, inverterPort);
 
-		
-		return BitConverter.ToString(frame).Replace("-", " "); // sillyCat;
+				if (verbose) Console.WriteLine("Connected to the server.");
+				int responses = 0;
+				while (responses < 2)
+				{
+					// Send data to the server
+					tcpClient.GetStream().Write(ConstructFrame(responses), 0, ConstructFrame(responses).Length);
+
+					if (verbose) Console.WriteLine($"Message #{responses} was sent to the inverter");
+
+					// Receive data from the server
+					byte[] buffer = new byte[1024];
+					int bytesRead = tcpClient.GetStream().Read(buffer, 0, buffer.Length);
+
+					if (verbose)
+					{
+						Console.WriteLine("Reply from the inverter, length: " + bytesRead + " bytes");
+						Console.WriteLine(Convert.ToBase64String(buffer));
+					}
+
+					digestedInfo = DigestResponse(buffer);
+
+					responses++;
+				}
+
+				return JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("An error occurred: " + ex.Message);
+			}
+		}
+
+		// This point should never be reached.
+		// But if somehow it will be, someone will get an easter egg!
+		return sillyCat;
 	}
 
 	private string GetCachedJson()
@@ -241,5 +259,96 @@ public class RequestHandler
 		}
 
 		return result;
+	}
+	
+	private static byte[] ConvertHexToByteArray(string hexString)
+	{
+		int length = hexString.Length;
+		byte[] byteArray = new byte[length / 2];
+
+		for (int i = 0; i < length; i += 2)
+		{
+			if (hexString[i] == '\\' && hexString[i + 1] == 'x')
+			{
+				// Skip the '\x' part and convert the remaining two characters
+				i += 2;
+			}
+
+			byteArray[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+		}
+
+		return byteArray;
+	}
+
+	private byte[] ConstructFrame(int sequence = 1)
+	{
+		/*
+		// This should be done via proper configuration menu, not hardcoded.
+		// TODO: make a configuration menu for those
+		uint inverterSn = 2749279538;
+		int regStart1 = Convert.ToInt32("0x0003", 16);
+		int regEnd1 = Convert.ToInt32("0x0070", 16);
+		
+		int pini = regStart1;
+		int pfin = regEnd1;
+		// Data frame begin
+		byte[] start = { 0xA5 };
+		byte[] length = { 0x17, 0x00 }; 
+		byte[] controlCode = { 0x10, 0x45 };
+		byte[] serial = { 0x00, 0x00 };
+
+		// Blank data field
+		byte[] dataField = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+		string posIni = Convert.ToString(pini, 16).PadLeft(4, '0');
+		string posFin = Convert.ToString(pfin - pini + 1, 16).PadLeft(4, '0');
+
+		byte[] businessField = { 0x01, 0x03,
+			Convert.ToByte(posIni.Substring(0, 2), 16),
+			Convert.ToByte(posIni.Substring(2, 2), 16),
+			Convert.ToByte(posFin.Substring(0, 2), 16),
+			Convert.ToByte(posFin.Substring(2, 2), 16) };
+		
+		ushort crcValue = CalculateCrc16Modbus(businessField);
+		byte[] crc = { (byte)(crcValue & 0xFF), (byte)((crcValue >> 8) & 0xFF) };
+
+		byte[] checksum = { 0x00 }; // checksum F2
+		byte[] endCode = { 0x15 };
+
+		byte[] inverterSn2 = BitConverter.GetBytes(inverterSn);
+		Array.Reverse(inverterSn2);
+
+		// Construct the frame
+		byte[] frame = ConcatArrays(start, length, controlCode, serial, inverterSn2, dataField, businessField, crc, checksum, endCode);
+		*/
+		
+		
+		// Those are taken from the original python script
+		// Eventually they need to be calculated by ConstructFrame()
+		byte[] unbased1 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwADAG40Jp0V");
+		byte[] unbased2 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwCWAGPlz38V");
+
+		if (sequence == 0)
+		{
+			return unbased1;
+		}
+		else
+		{
+			return unbased2;
+		}
+		
+		// return frame;
+	}
+
+	private FrameInfo DigestResponse(byte[] frame, FrameInfo previousFrame = null)
+	{
+		FrameInfo frameInfo = previousFrame ?? new FrameInfo();
+		
+		// Some example values, so it's not completely useless
+		// TODO: make a proper frame analysis
+		frameInfo.Fault3 = 12851;
+		frameInfo.Fault4 = 12337;
+		frameInfo.Fault5 = 12596;
+		return frameInfo;
 	}
 }

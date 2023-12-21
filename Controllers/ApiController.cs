@@ -37,7 +37,16 @@ public class ApiController : ControllerBase
 
 		// var reply = new RequestHandler().ResponseManager(ResponseType.Ok);
 		
-		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CurrentData);
+		// TODO: make ResponseType dynamic, and not hardcoded to "Ok"
+		try
+		{
+			return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CurrentData);
+		}
+		catch
+		{
+			return new RequestHandler().ResponseManager(ResponseType.UnknownError, ReplyDataType.NoData);
+		}
+		
 	}
 }
 
