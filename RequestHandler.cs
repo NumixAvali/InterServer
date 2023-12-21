@@ -346,9 +346,27 @@ public class RequestHandler
 		
 		// Some example values, so it's not completely useless
 		// TODO: make a proper frame analysis
+		Random r = new Random();
+		
 		frameInfo.Fault3 = 12851;
 		frameInfo.Fault4 = 12337;
-		frameInfo.Fault5 = 12596;
+		frameInfo.Fault5 = r.Next(10000, 13000);//12596;
+		// frameInfo.TotalProduction = r.Next(0, 100);
+
+		int a = 1;
+		// Those are taken from the config file, no touchy
+		byte[] pini = {0x03};
+		byte[] pfin = {0x70};
+		byte[] pini2 = {0x96};
+		byte[] pfin2 = {0xf8};
+		
+		int chunks = 1;
+		int p1 = 56 + (a * 4);
+		int p2 = 60 + (a * 4);
+		
+		byte[] interesting = { frame[56],frame[57],frame[58],frame[59],frame[60] };
+		// Console.WriteLine(BitConverter.ToString(interesting).Replace("-", " "));
+		
 		return frameInfo;
 	}
 }

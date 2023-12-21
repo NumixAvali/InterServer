@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Diagnostics
+@{
     ViewData["Title"] = "Home Page";
 }
 <style>
@@ -9,7 +10,7 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
 </div>
 
 <div class="align-content-lg-start">
@@ -17,7 +18,7 @@
     <p class="fst-italic">Here should be a graph with some cached data, taken from DB.</p>
     <p class="preserve-newlines">
         @{
-            var response =  new RequestHandler().ResponseManager(ResponseType.Ok,ReplyDataType.CachedData); //"Here should be a graph with some cached data, taken from DB.";
+            var response =  new RequestHandler().ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData); //"Here should be a graph with some cached data, taken from DB.";
             //JsonSerializer.Serialize(response)
             @response.data
         }
