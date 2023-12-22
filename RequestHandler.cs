@@ -352,20 +352,62 @@ public class RequestHandler
 		frameInfo.Fault4 = 12337;
 		frameInfo.Fault5 = r.Next(10000, 13000);//12596;
 		// frameInfo.TotalProduction = r.Next(0, 100);
-
-		int a = 1;
-		// Those are taken from the config file, no touchy
-		byte[] pini = {0x03};
-		byte[] pfin = {0x70};
-		byte[] pini2 = {0x96};
-		byte[] pfin2 = {0xf8};
 		
-		int chunks = 1;
-		int p1 = 56 + (a * 4);
-		int p2 = 60 + (a * 4);
-		
-		byte[] interesting = { frame[56],frame[57],frame[58],frame[59],frame[60] };
+		// byte[] interesting = { frame[56],frame[57],frame[58],frame[59],frame[60] };
 		// Console.WriteLine(BitConverter.ToString(interesting).Replace("-", " "));
+
+
+		// Those are taken from the config file, no touchy
+		byte[] pini = {0x0003};
+		byte[] pfin = {0x0070};
+		byte[] pini2 = {0x0096};
+		byte[] pfin2 = {0x00f8};
+
+		int chunks = 1;
+		
+		int a = 0;
+		int i = Convert.ToInt32(0x0070) - Convert.ToInt32(0x0003);
+
+		while (a<=i)
+		{
+			int p1 = 56 + (a * 4);
+            int p2 = 60 + (a * 4);
+            string hexpos = $"0x{((a + 0x0003) & 0xFFFF):X4}";
+            // Console.WriteLine("hexpos="+hexpos);
+  
+            // Read the config, and get register position addresses 
+            string configFile = File.ReadAllText("./SOFARMap.json", Encoding.UTF8);
+            JsonDocument jsonDocument = JsonDocument.Parse(configFile);
+            
+            var rootArrayEnumerator = jsonDocument.RootElement.EnumerateArray();
+
+            // Iterate through the object array
+            foreach (JsonElement element in rootArrayEnumerator)
+            {
+	            // Iterate through the "items" array
+	            var itemsArrayEnumerator = element.GetProperty("items").EnumerateArray();
+	            foreach (JsonElement itemElement in itemsArrayEnumerator)
+	            {
+		            // Access properties of each item
+		            // Can be done in the scope with the rest of the logic as well tbh
+		            string titleEN = itemElement.GetProperty("titleEN").GetString();
+		            
+		            // Iterate through the "registers" array
+		            var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
+		            foreach (JsonElement registerElement in registersArrayEnumerator)
+		            {
+			            bool found = registerElement.GetString().Contains(hexpos);
+			            if (found) Console.WriteLine($"Title: \"{titleEN}\", registers: {registerElement}");
+			            
+			            // Here be valid frame processing
+			            // TODO: implement frame processing
+		            }
+	            }
+            }
+  
+            a++;
+		}
+		
 		
 		return frameInfo;
 	}

@@ -90,3 +90,20 @@ public class FrameInfo
 	public int Pv2Power { get; set; }
 	public int BatteryPower { get; set; }
 }
+
+// I'm so sorry for the naming scheme in that class.
+// It's taken directly from the file, that was used in mediocre python script
+public class ConfigObj
+{
+	string titleEN { get; set; }
+	string titlePL { get; set; }
+	string[] registers { get; set; }
+	int DomoticzIdx { get; set; }
+	float ratio { get; set; }
+	string unit { get; set; }
+	int graph { get; set; }
+	string metric_type { get; set; }
+	string metric_name { get; set; }
+	string label_name { get; set; }
+	string label_value { get; set; }
+}
