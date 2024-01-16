@@ -390,17 +390,29 @@ public class RequestHandler
 	            {
 		            // Access properties of each item
 		            // Can be done in the scope with the rest of the logic as well tbh
-		            string titleEN = itemElement.GetProperty("titleEN").GetString();
+		            string title = itemElement.GetProperty("titleEN").GetString();
 		            
 		            // Iterate through the "registers" array
 		            var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
 		            foreach (JsonElement registerElement in registersArrayEnumerator)
 		            {
+
 			            bool found = registerElement.GetString().Contains(hexpos);
-			            if (found) Console.WriteLine($"Title: \"{titleEN}\", registers: {registerElement}");
 			            
-			            // Here be valid frame processing
+			            // Currently it's for logging only, processing needs to be done in a separate method,
+			            // and must handle accordingly
 			            // TODO: implement frame processing
+			            if (registersArrayEnumerator.Count() > 1)
+			            {
+				            // Processing multi-byte registers
+				            var jsonElementsArray = registersArrayEnumerator.ToArray();
+				            if (found) Console.WriteLine($"Title: \"{title}\", registers: {string.Join(", ",jsonElementsArray)}");
+			            }
+			            else
+			            {
+				            // Processing single-byte registers
+				            if (found) Console.WriteLine($"Title: \"{title}\", registers: {registerElement}");
+			            }
 		            }
 	            }
             }
