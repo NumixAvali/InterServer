@@ -120,6 +120,13 @@ public class RequestHandler
 			data = dataResponse
 		};
 
+		// TODO: turn sillyCat check into a proper value, like `ResponseType.UnknownError`
+		if (reply.data == sillyCat)
+		{
+			reply.message = responseMessages[ResponseType.UnknownError];
+			reply.data = responseDataType[ReplyDataType.NoData];
+		}
+
 		
 		return reply;
 	}
@@ -188,7 +195,15 @@ public class RequestHandler
 						Console.WriteLine(Convert.ToBase64String(buffer));
 					}
 
-					digestedInfo = dataProcessor.DigestResponse(buffer);
+					try
+					{
+						digestedInfo = dataProcessor.DigestResponse(buffer);
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine("Data processor error:\n"+e);
+						// throw;
+					}
 
 					responses++;
 				}
@@ -197,12 +212,11 @@ public class RequestHandler
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("An error occurred: " + ex.Message);
+				Console.WriteLine("[TCP Client] Error: " + ex.Message);
 			}
 		}
 
-		// This point should never be reached.
-		// But if somehow it will be, someone will get an easter egg!
+		// This point is reached upon error in TCP client.
 		return sillyCat;
 	}
 
