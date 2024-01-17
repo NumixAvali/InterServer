@@ -64,36 +64,46 @@ public class DataProcessor
     	return byteArray;
     }
     
-    public static int TwosComplementHex(string hexval, string reg)
+    public static int CalculateFrameHexValue(byte[] frameHexval, string reg)
     {
-	    if (string.IsNullOrEmpty(hexval) || hexval.Contains(" "))
+	    try
 	    {
-		    Console.WriteLine($"No value in response for register {reg}");
-		    Console.WriteLine("Check register start/end values in config.cfg");
-		    Environment.Exit(1);
+		    // TODO: make a loop, that goes through frameHexval, and returns the corresponding value to register
+		    
+		    // Console.WriteLine($"value before conversion: {hexval}");
+		    int val = BitConverter.ToInt32(frameHexval); //Convert.ToInt32(hexval, 16);
+		    // Console.WriteLine($"value after conversion: {val}");
+		    // if ((val & (1 << (bits - 1))) != 0)
+		    // {
+			   //  val -= 1 << bits;
+		    // }
+		    return val;
 	    }
-	    else
+	    catch (FormatException ex)
 	    {
-		    const int bits = 16;
-
-		    try
-		    {
-			    int val = Convert.ToInt32(hexval, 16);
-			    if ((val & (1 << (bits - 1))) != 0)
-			    {
-				    val -= 1 << bits;
-			    }
-			    return val;
-		    }
-		    catch (FormatException ex)
-		    {
-			    Console.WriteLine($"Error converting hex value '{hexval}' for register {reg}: {ex.Message}");
-			    // Environment.Exit(1);
-		    }
+		    Console.WriteLine($"Error converting hex value '{frameHexval}' for register {reg}: {ex.Message}");
+		    // Environment.Exit(1);
 	    }
 	    return 0; // This might need to be adjusted based on your logic
     }
     
+    public static int TwosComplementHex(string hexval, string reg)
+    {
+	    if (hexval == "" || hexval.Contains(" "))
+	    {
+		    Console.WriteLine("No value in response for register " + reg);
+		    return 0;
+	    }
+	    int bits = 16;
+	    int val = Convert.ToInt32(hexval, bits);
+            
+	    if ((val & (1 << (bits - 1))) != 0)
+	    {
+		    val -= 1 << bits;
+	    }
+            
+	    return val;
+    }
 	public byte[] ConstructFrame(int sequence = 1)
 	{
 		/*
@@ -194,12 +204,14 @@ public class DataProcessor
             string hexpos = $"0x{((a + 0x0003) & 0xFFFF):X4}";
             // Console.WriteLine("hexpos="+hexpos);
             
-            // "response" calculation
-            int response = TwosComplementHex(
-	            new string(frame.Select(x => (char)x).ToArray())
-		            .Replace(" ", "")
-		            .Substring(p1, p2 - p1),
-	            hexpos);
+            string hexString = string.Concat(
+	            BitConverter.ToString(frame).Replace("-", ""),
+	            " ",
+	            new string(Encoding.ASCII.GetString(frame).Where(c => c >= 0x20 && c <= 0x7F).ToArray()));
+            string selectedSubstring = hexString.Substring(p1, p2 - p1);
+            int response = TwosComplementHex(selectedSubstring, hexpos);
+            // Console.WriteLine($"response: {response}");
+			int frameHexValue = CalculateFrameHexValue(frame, hexpos);
   
             
             // Read the config, and get register position addresses 
@@ -219,7 +231,7 @@ public class DataProcessor
 		            // Can be done in the scope with the rest of the logic as well tbh
 		            string title = itemElement.GetProperty("titleEN").GetString();
 		            string unit = itemElement.GetProperty("unit").GetString();
-		            string ratio = itemElement.GetProperty("ratio").GetString();
+		            decimal ratio = itemElement.GetProperty("ratio").GetDecimal();
 		            
 		            // Iterate through the "registers" array
 		            var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
@@ -235,28 +247,14 @@ public class DataProcessor
 			            {
 				            // Processing multi-byte registers
 				            var jsonElementsArray = registersArrayEnumerator.ToArray();
-				            if (found) Console.WriteLine($"Title: \"{title}\", registers: {string.Join("; ",jsonElementsArray)} - NIY processing");
+				            if (found) Console.WriteLine($"Title: \"{title}\", registers: {string.Join("; ",jsonElementsArray)}, value: NIY");
 			            }
 			            else
 			            {
 				            // Processing single-byte registers
 				            if (found)
 				            {
-					            // WARNING
-					            // BAD (experimental) CODE AHEAD
-
-					            if (hexpos == "0x0061")
-					            {
-						            // int response = TwosComplementHex(string.Concat(frame.Select(x => x.ToString("X2"))), hexpos);
-						            // int response = TwosComplementHex(frame, hexpos);
-						            totalpower += response * Convert.ToDouble(ratio);
-						            Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: {totalpower}");
-					            }
-					            else
-					            {
-									Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: NIY");
-					            }
-					            
+								Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: {response*ratio}{unit}");
 				            }
 			            }
 		            }
