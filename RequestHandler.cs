@@ -7,65 +7,6 @@ namespace InterServer;
 
 public class RequestHandler
 {
-	// public RequestHandler(HttpListenerRequest request, HttpListenerResponse response, bool dryRun = true) //
-	// {
-	// 	// Stop the logic, in case of artificial summon
-	// 	if (request == null || response == null) return;
-	//
-	// 	// Private method picker
-	// 	switch (request.HttpMethod)
-	// 	{
-	// 		case "POST":
-	// 		{
-	// 			PostHandler(request, response);
-	// 			break;
-	// 		}
-	// 		case "GET":
-	// 		{
-	// 			GetHandler(response);
-	// 			break;
-	// 		}
-	// 	}
-	// 	
-	// }
-
-	private void GetHandler(HttpListenerResponse response)
-	{
-		const string placeHolderRespose = "TODO: Make actual website for displaying data, etc.";
-		
-		byte[] responseBytes = Encoding.UTF8.GetBytes(placeHolderRespose);
-		
-		
-		response.ContentLength64 = responseBytes.Length;
-		response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
-		response.Close();
-	}
-
-	private void PostHandler(HttpListenerRequest request, HttpListenerResponse response)
-	{
-		Stream body = request.InputStream;
-		Encoding encoding = request.ContentEncoding;
-		StreamReader reader = new StreamReader(body, encoding);
-
-		string postData = reader.ReadToEnd();
-		
-		Console.WriteLine($"POST request data:\n{postData}");
-		body.Close();
-		reader.Close();
-
-		RequestJson incomingJson = JsonSerializer.Deserialize<RequestJson>(postData)!;
-		// TestJsonData ?postObj = JsonSerializer.Deserialize<TestJsonData>(postData);
-		//
-		// if (postObj != null)
-		// {
-		// 	Console.WriteLine($"And the same thing, but obj:\n{postObj.key1}\n{postObj.key2}");
-		// }
-		
-		
-		// A thing for handling response text
-		ResponseManager(incomingJson.RequestType);
-	}
-
 	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData)
 	{
 		// TODO: passed arguments are must be a suggestion at this point.
@@ -83,8 +24,12 @@ public class RequestHandler
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
 		
 		string responseStr = "Internal error!";
-
 		string dataResponse = sillyCat;
+		DataJson preFinalJson = new DataJson()
+		{
+			dataState = ResponseType.UnknownError,
+			data = sillyCat,
+		};
 
 		Dictionary<ResponseType, string> responseMessages = new Dictionary<ResponseType, string>
 		{
@@ -94,13 +39,14 @@ public class RequestHandler
 			{ ResponseType.ServiceUnavailable, "Service temporary unavailable. Try again later." },
 			{ ResponseType.UnknownError, "Unknown server error. Try again later." },
 			{ ResponseType.Rejected, "Rejected." },
+			{ ResponseType.InternalError, "Internal Error."}
 		};
 		
-		Dictionary<ReplyDataType, string> responseDataType = new Dictionary<ReplyDataType, string>
+		Dictionary<ReplyDataType, DataJson> responseDataType = new Dictionary<ReplyDataType, DataJson>
 		{
 			{ ReplyDataType.CachedData, GetCachedJson() },
 			{ ReplyDataType.CurrentData, GetJson() },
-			{ ReplyDataType.NoData, sillyCat },
+			{ ReplyDataType.NoData, preFinalJson },
 		};
 		
 		if (responseMessages.TryGetValue(responseType, out var message))
@@ -110,7 +56,7 @@ public class RequestHandler
 		
 		if (responseDataType.TryGetValue(dataType, out var dataMessage))
 		{
-			dataResponse = dataMessage;
+			preFinalJson = dataMessage;
 		}
 
 
@@ -120,11 +66,32 @@ public class RequestHandler
 			data = dataResponse
 		};
 
-		// TODO: turn sillyCat check into a proper value, like `ResponseType.UnknownError`
-		if (reply.data == sillyCat)
+		switch (preFinalJson.dataState)
 		{
-			reply.message = responseMessages[ResponseType.UnknownError];
-			reply.data = responseDataType[ReplyDataType.NoData];
+			case ResponseType.Ok:
+			{
+				reply.message = responseMessages[ResponseType.Ok];
+				reply.data = preFinalJson.data;
+				break;
+			}
+			case ResponseType.InternalError:
+			{
+				reply.message = responseMessages[ResponseType.InternalError];
+				reply.data = responseDataType[ReplyDataType.NoData].data;
+				break;
+			}
+			case ResponseType.ConnectionError:
+			{
+				reply.message = responseMessages[ResponseType.ConnectionError];
+				reply.data = responseDataType[ReplyDataType.NoData].data;
+				break;
+			}
+			default:
+			{
+				reply.message = responseMessages[ResponseType.UnknownError];
+				reply.data = responseDataType[ReplyDataType.NoData].data;
+				break;
+			}
 		}
 
 		
@@ -132,7 +99,7 @@ public class RequestHandler
 	}
 	
 
-	private string GetJson()
+	private DataJson GetJson()
 	{
 		const bool verbose = false;
 		string sillyCat =
@@ -146,30 +113,19 @@ public class RequestHandler
 ⣿⡡⢟⡛⠻⠿⣿⣿⣿⣝⣨⣝⣡⣿⣿⡿⠿⠿⢟⣛⣫⣼⣿
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
-
+		
+		DataProcessor dataProcessor = new DataProcessor();
+		FrameInfo digestedInfo = new FrameInfo();
+		DataJson internalDataJson = new DataJson();
+		
 		const string inverterIp = "192.168.2.211";
 		const int inverterPort = 8899;
-
-		DataProcessor dataProcessor = new DataProcessor();
-
 		byte[] frame = dataProcessor.ConstructFrame();
-		FrameInfo digestedInfo = new FrameInfo();
-		
 
-		// if (verbose)
-		// {
-		// 	Console.WriteLine("Assembled frame:");
-		// 	Console.WriteLine(BitConverter.ToString(frame).Replace("-", " "));
-		// 	// Console.WriteLine(Convert.ToBase64String(frame));
-		//
-		// 	Console.WriteLine("Based string converted:");
-		// 	Console.WriteLine(BitConverter.ToString(unbased1).Replace("-", " "));
-		// 	// Console.WriteLine(Convert.ToBase64String(unbased1));
-		// }
-		
+		internalDataJson.dataState = ResponseType.UnknownError;
+		internalDataJson.data = sillyCat;
 		
 		//TCP client
-		
 		using (TcpClient tcpClient = new TcpClient())
 		{
 			try
@@ -178,6 +134,7 @@ public class RequestHandler
 
 				if (verbose) Console.WriteLine("Connected to the server.");
 				int responses = 0;
+				List<byte[]> bufferList = new List<byte[]>();
 				while (responses < 2)
 				{
 					// Send data to the server
@@ -195,32 +152,48 @@ public class RequestHandler
 						Console.WriteLine(Convert.ToBase64String(buffer));
 					}
 
-					try
-					{
-						digestedInfo = dataProcessor.DigestResponse(buffer);
-					}
-					catch (Exception e)
-					{
-						Console.WriteLine("Data processor error:\n"+e);
-						// throw;
-					}
+					bufferList.Add(buffer);
 
 					responses++;
 				}
+				
+				try
+				{
+					digestedInfo = dataProcessor.DigestResponse(bufferList[0]);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Data processor error:\n"+e);
+					// throw;
+				}
 
-				return JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
+
+				internalDataJson.data = JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
+				internalDataJson.dataState = ResponseType.Ok;
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("[TCP Client] Error: " + ex.Message);
+				Console.WriteLine(ex);
+				if (ex.Message == "connection timeout or something")
+				{
+					internalDataJson.data = ex.Message;
+					internalDataJson.dataState = ResponseType.ConnectionError;
+				}
+				else
+				{
+					internalDataJson.data = ex.Message;
+					internalDataJson.dataState = ResponseType.InternalError;
+				}
+				
 			}
 		}
 
 		// This point is reached upon error in TCP client.
-		return sillyCat;
+		return internalDataJson;
 	}
 
-	private string GetCachedJson()
+	private DataJson GetCachedJson()
 	{
 		string otherSillyCat =
 @"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -235,7 +208,12 @@ public class RequestHandler
 ⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀";
 
-		return otherSillyCat;
+		DataJson dataJson = new DataJson
+		{
+			dataState = ResponseType.Ok,
+			data = otherSillyCat
+		};
+		return dataJson;
 	}
 	
 

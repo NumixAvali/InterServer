@@ -13,7 +13,9 @@ public enum ResponseType : ushort
 	ServiceUnavailable = 2,
 	UnknownError = 3,
 	Ok = 4,
-	Rejected = 5
+	Rejected = 5,
+	InternalError = 6,
+	ConnectionError = 7
 }
 
 public enum ReplyDataType : ushort
@@ -37,10 +39,10 @@ public class ReplyJson
 	public string? data { get; set; }
 }
 
-public class TestJsonData
+public class DataJson
 {
-	public string? key1 { get; set; }
-	public string? key2 { get; set; }
+	public ResponseType dataState { get; set; }
+	public string data { get; set; }
 }
 
 public class FrameInfo
