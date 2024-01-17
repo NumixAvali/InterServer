@@ -9,8 +9,7 @@ Secondary goal of this project is to provide API for controlling and monitoring 
 Currently implemented features:
 - [ ] Getting information from the hardware
   - [ ] Getting cached information
-  - [ ] Getting current information
-- [ ] Setting parameters on the hardware
+  - [x] Getting current information
 - [ ] Web UI
   - [ ] Graphs
   - [ ] Settings
