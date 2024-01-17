@@ -64,30 +64,7 @@ public class DataProcessor
     	return byteArray;
     }
     
-    public static int CalculateFrameHexValue(byte[] frameHexval, string reg)
-    {
-	    try
-	    {
-		    // TODO: make a loop, that goes through frameHexval, and returns the corresponding value to register
-		    
-		    // Console.WriteLine($"value before conversion: {hexval}");
-		    int val = BitConverter.ToInt32(frameHexval); //Convert.ToInt32(hexval, 16);
-		    // Console.WriteLine($"value after conversion: {val}");
-		    // if ((val & (1 << (bits - 1))) != 0)
-		    // {
-			   //  val -= 1 << bits;
-		    // }
-		    return val;
-	    }
-	    catch (FormatException ex)
-	    {
-		    Console.WriteLine($"Error converting hex value '{frameHexval}' for register {reg}: {ex.Message}");
-		    // Environment.Exit(1);
-	    }
-	    return 0; // This might need to be adjusted based on your logic
-    }
-    
-    public static int TwosComplementHex(string hexval, string reg)
+    private static int ConvertFrameHexValueToInt(string hexval, string reg)
     {
 	    if (hexval == "" || hexval.Contains(" "))
 	    {
@@ -103,6 +80,12 @@ public class DataProcessor
 	    }
             
 	    return val;
+    }
+
+    private FrameInfo CheckFrameInfoJson(FrameInfo[] previousFramesArr)
+    {
+	    
+	    return null;
     }
 	public byte[] ConstructFrame(int sequence = 1)
 	{
@@ -170,38 +153,25 @@ public class DataProcessor
 		
 		// Some example values, so it's not completely useless
 		// TODO: make a proper frame analysis
-		Random r = new Random();
 		
 		frameInfo.Fault3 = 12851;
 		frameInfo.Fault4 = 12337;
-		frameInfo.Fault5 = r.Next(10000, 13000);//12596;
-		// frameInfo.TotalProduction = r.Next(0, 100);
+		frameInfo.Fault5 = 12596;
 		
-		// byte[] interesting = { frame[56],frame[57],frame[58],frame[59],frame[60] };
-		// Console.WriteLine(BitConverter.ToString(interesting).Replace("-", " "));
-
-
 		// Those are taken from the config file, no touchy
 		byte[] pini = {0x0003};
 		byte[] pfin = {0x0070};
 		byte[] pini2 = {0x0096};
 		byte[] pfin2 = {0x00f8};
-
-		int chunks = 1;
 		
-		int a = 0;
-		int i = Convert.ToInt32(0x0070) - Convert.ToInt32(0x0003);
+		int processingIterations = 0;
+		int i = Convert.ToInt32(0x0070) - Convert.ToInt32(0x0003); // Taken from the example code, no idea what that actually is
 		
-		// Initialize variables for spaghetti code
-		double totalpower = 0;
-		double totalConsPower = 0;
-		double totalTime = 0;
-		
-		while (a<=i)
+		while (processingIterations<=i)
 		{
-			int p1 = 56 + (a * 4);
-            int p2 = 60 + (a * 4);
-            string hexpos = $"0x{((a + 0x0003) & 0xFFFF):X4}";
+			int p1 = 56 + (processingIterations * 4);
+            int p2 = 60 + (processingIterations * 4);
+            string hexpos = $"0x{((processingIterations + 0x0003) & 0xFFFF):X4}";
             // Console.WriteLine("hexpos="+hexpos);
             
             string hexString = string.Concat(
@@ -209,12 +179,10 @@ public class DataProcessor
 	            " ",
 	            new string(Encoding.ASCII.GetString(frame).Where(c => c >= 0x20 && c <= 0x7F).ToArray()));
             string selectedSubstring = hexString.Substring(p1, p2 - p1);
-            int response = TwosComplementHex(selectedSubstring, hexpos);
-            // Console.WriteLine($"response: {response}");
-			int frameHexValue = CalculateFrameHexValue(frame, hexpos);
-  
+            int intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
             
             // Read the config, and get register position addresses 
+            // TODO: switch to production-ready config file before continuing the development
             string configFile = File.ReadAllText("./SOFARMap.json", Encoding.UTF8);
             JsonDocument jsonDocument = JsonDocument.Parse(configFile);
             
@@ -230,7 +198,7 @@ public class DataProcessor
 		            // Access properties of each item
 		            // Can be done in the scope with the rest of the logic as well tbh
 		            string title = itemElement.GetProperty("titleEN").GetString();
-		            string unit = itemElement.GetProperty("unit").GetString();
+		            string unit = itemElement.GetProperty("unit").GetString(); // Might be left unused for now
 		            decimal ratio = itemElement.GetProperty("ratio").GetDecimal();
 		            
 		            // Iterate through the "registers" array
@@ -240,9 +208,7 @@ public class DataProcessor
 
 			            bool found = registerElement.GetString().Contains(hexpos);
 			            
-			            // Currently it's for logging only, processing needs to be done in a separate method,
-			            // and must handle accordingly
-			            // TODO: implement frame processing
+			            // TODO: implement 2-byte value processing
 			            if (registersArrayEnumerator.Count() > 1)
 			            {
 				            // Processing multi-byte registers
@@ -254,18 +220,14 @@ public class DataProcessor
 				            // Processing single-byte registers
 				            if (found)
 				            {
-								Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: {response*ratio}{unit}");
+								Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: {intFrameValue*ratio}{unit}");
 				            }
 			            }
 		            }
 	            }
             }
-  
-            a++;
+            processingIterations++;
 		}
-		
-		
 		return frameInfo;
 	}
-
 }
