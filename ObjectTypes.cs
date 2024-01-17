@@ -47,6 +47,7 @@ public class DataJson
 
 public class FrameInfo
 {
+	// TODO: turn every property into an object with value, data unit, and value modifier 
 	public int Fault3 { get; set; }
 	public int Fault4 { get; set; }
 	public int Fault5 { get; set; }
