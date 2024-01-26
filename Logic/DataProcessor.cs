@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace InterServer;
+namespace InterServer.Logic;
 
 public class DataProcessor
 {

@@ -1,4 +1,4 @@
-﻿namespace InterServer;
+﻿namespace InterServer.Logic;
 
 public enum JsonRequestType : ushort
 {
