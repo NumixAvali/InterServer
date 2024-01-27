@@ -82,10 +82,10 @@ public class DataProcessor
 	    return val;
     }
 
-    private FrameInfo CheckFrameInfoJson(FrameInfo[] previousFramesArr)
+    private FrameInfo CheckFrameInfoJson(FrameInfo[] framesArr)
     {
-	    
-	    return null;
+	    // TODO: make object array comparison
+	    return framesArr[0];
     }
 	public byte[] ConstructFrame(int sequence = 1)
 	{
@@ -147,16 +147,16 @@ public class DataProcessor
 		// return frame;
 	}
 
-	public FrameInfo DigestResponse(byte[] frame, FrameInfo previousFrame = null)
+	public FrameInfo DigestResponse(List<byte[]> frameList)
 	{
-		FrameInfo frameInfo = previousFrame ?? new FrameInfo();
+		FrameInfo[] frameInfoArr = new FrameInfo[] { };
+		FrameInfo frameInfoTemp = new FrameInfo();
 		
 		// Some example values, so it's not completely useless
-		// TODO: make a proper frame analysis
-		
-		frameInfo.Fault3 = 12851;
-		frameInfo.Fault4 = 12337;
-		frameInfo.Fault5 = 12596;
+		// TODO: finish proper frame analysis
+		frameInfoTemp.Fault3 = 12851;
+		frameInfoTemp.Fault4 = 12337;
+		frameInfoTemp.Fault5 = 12596;
 		
 		// Those are taken from the config file, no touchy
 		byte[] pini = {0x0003};
@@ -164,70 +164,80 @@ public class DataProcessor
 		byte[] pini2 = {0x0096};
 		byte[] pfin2 = {0x00f8};
 		
-		int processingIterations = 0;
-		int i = Convert.ToInt32(0x0070) - Convert.ToInt32(0x0003); // Taken from the example code, no idea what that actually is
-		
-		while (processingIterations<=i)
+		foreach (byte[] frame in frameList)
 		{
-			int p1 = 56 + (processingIterations * 4);
-            int p2 = 60 + (processingIterations * 4);
-            string hexpos = $"0x{((processingIterations + 0x0003) & 0xFFFF):X4}";
-            // Console.WriteLine("hexpos="+hexpos);
-            
-            string hexString = string.Concat(
-	            BitConverter.ToString(frame).Replace("-", ""),
-	            " ",
-	            new string(Encoding.ASCII.GetString(frame).Where(c => c >= 0x20 && c <= 0x7F).ToArray()));
-            string selectedSubstring = hexString.Substring(p1, p2 - p1);
-            int intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
-            
-            // Read the config, and get register position addresses 
-            // TODO: switch to production-ready config file before continuing the development
-            string configFile = File.ReadAllText("./SOFARMap.json", Encoding.UTF8);
-            JsonDocument jsonDocument = JsonDocument.Parse(configFile);
-            
-            var rootArrayEnumerator = jsonDocument.RootElement.EnumerateArray();
+			var processingIterations = 0;
+			var i = Convert.ToInt32(0x0070) -
+			        Convert.ToInt32(0x0003); // Taken from the example code, no idea what that actually is
 
-            // Iterate through the object array
-            foreach (JsonElement element in rootArrayEnumerator)
-            {
-	            // Iterate through the "items" array
-	            var itemsArrayEnumerator = element.GetProperty("items").EnumerateArray();
-	            foreach (JsonElement itemElement in itemsArrayEnumerator)
-	            {
-		            // Access properties of each item
-		            // Can be done in the scope with the rest of the logic as well tbh
-		            string title = itemElement.GetProperty("titleEN").GetString();
-		            string unit = itemElement.GetProperty("unit").GetString(); // Might be left unused for now
-		            decimal ratio = itemElement.GetProperty("ratio").GetDecimal();
-		            
-		            // Iterate through the "registers" array
-		            var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
-		            foreach (JsonElement registerElement in registersArrayEnumerator)
-		            {
+			while (processingIterations <= i)
+			{
+				var p1 = 56 + processingIterations * 4;
+				var p2 = 60 + processingIterations * 4;
+				var hexpos = $"0x{(processingIterations + 0x0003) & 0xFFFF:X4}";
+				// Console.WriteLine("hexpos="+hexpos);
 
-			            bool found = registerElement.GetString().Contains(hexpos);
-			            
-			            // TODO: implement 2-byte value processing
-			            if (registersArrayEnumerator.Count() > 1)
-			            {
-				            // Processing multi-byte registers
-				            var jsonElementsArray = registersArrayEnumerator.ToArray();
-				            if (found) Console.WriteLine($"Title: \"{title}\", registers: {string.Join("; ",jsonElementsArray)}, value: NIY");
-			            }
-			            else
-			            {
-				            // Processing single-byte registers
-				            if (found)
-				            {
-								Console.WriteLine($"Title: \"{title}\", registers: {registerElement}, value: {intFrameValue*ratio}{unit}");
-				            }
-			            }
-		            }
-	            }
-            }
-            processingIterations++;
+				var hexString = string.Concat(
+					BitConverter.ToString(frame).Replace("-", ""),
+					" ",
+					new string(Encoding.ASCII.GetString(frame).Where(c => c >= 0x20 && c <= 0x7F).ToArray()));
+				var selectedSubstring = hexString.Substring(p1, p2 - p1);
+				var intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
+
+				// Read the config, and get register position addresses 
+				// TODO: switch to production-ready config file before continuing the development
+				var configFile = File.ReadAllText("./SOFARMap.json", Encoding.UTF8);
+				var jsonDocument = JsonDocument.Parse(configFile);
+
+				var rootArrayEnumerator = jsonDocument.RootElement.EnumerateArray();
+
+				// Iterate through the object array
+				foreach (var element in rootArrayEnumerator)
+				{
+					// Iterate through the "items" array
+					var itemsArrayEnumerator = element.GetProperty("items").EnumerateArray();
+					foreach (var itemElement in itemsArrayEnumerator)
+					{
+						// Access properties of each item
+						// Can be done in the scope with the rest of the logic as well tbh
+						var title = itemElement.GetProperty("titleEN").GetString();
+						var unit = itemElement.GetProperty("unit").GetString(); // Might be left unused for now
+						var ratio = itemElement.GetProperty("ratio").GetDecimal();
+
+						// Iterate through the "registers" array
+						var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
+						foreach (var registerElement in registersArrayEnumerator)
+						{
+							var found = registerElement.GetString().Contains(hexpos);
+
+							// TODO: implement 2-byte value processing
+							if (registersArrayEnumerator.Count() > 1)
+							{
+								// Processing multi-byte registers
+								var jsonElementsArray = registersArrayEnumerator.ToArray();
+								
+								// Everyone treats 2-byte fields as 1-byte, and so will I
+								// Actual handling mechanism is required for that though
+								if (found)
+									Console.WriteLine(
+										$"Title: \"{title}\", registers: {string.Join("; ", jsonElementsArray)}, value: {intFrameValue * ratio}{unit}");
+							}
+							else
+							{
+								// Processing single-byte registers
+								if (found)
+									Console.WriteLine(
+										$"Title: \"{title}\", registers: {registerElement}, value: {intFrameValue * ratio}{unit}");
+							}
+						}
+					}
+				}
+
+				// frameInfoArr.Append(frameInfoTemp);
+				processingIterations++;
+			}
 		}
-		return frameInfo;
+
+		return frameInfoTemp; //CheckFrameInfoJson(frameInfoArr);
 	}
 }

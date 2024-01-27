@@ -118,7 +118,6 @@ public class RequestHandler
 		
 		const string inverterIp = "192.168.2.211";
 		const int inverterPort = 8899;
-		byte[] frame = dataProcessor.ConstructFrame();
 
 		internalDataJson.dataState = ResponseType.UnknownError;
 		internalDataJson.data = sillyCat;
@@ -157,8 +156,7 @@ public class RequestHandler
 				
 				try
 				{
-					// TODO: It's temporary set to the first element due to incomplete transition to array processing way
-					digestedInfo = dataProcessor.DigestResponse(bufferList[0]);
+					digestedInfo = dataProcessor.DigestResponse(bufferList);
 				}
 				catch (Exception e)
 				{
