@@ -1,5 +1,5 @@
 using System.Text;
-using System.Text.Json;
+using YamlDotNet.Serialization;
 
 namespace InterServer.Logic;
 
@@ -181,7 +181,7 @@ public class DataProcessor
 		{
 			var processingIterations = 0;
 			var i = Convert.ToInt32(0x0070) -
-			        Convert.ToInt32(0x0003); // Taken from the example code, no idea what that actually is
+			        Convert.ToInt32(0x0003); // Apparently it's just 112-3?
 
 			while (processingIterations <= i)
 			{
@@ -198,59 +198,53 @@ public class DataProcessor
 				var intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
 
 				// Read the config, and get register position addresses 
-				// TODO: switch to production-ready config file before continuing the development
-				var configFile = File.ReadAllText("./SOFARMap.json", Encoding.UTF8);
-				var jsonDocument = JsonDocument.Parse(configFile);
-
-				var rootArrayEnumerator = jsonDocument.RootElement.EnumerateArray();
-
-				// Iterate through the object array
-				foreach (var element in rootArrayEnumerator)
+				var config = ReadConfig(); //deserializer.Deserialize<RootObject>(configFile);
+				
+				// Config logging and processing
+				foreach (var parameter in config.parameters)
 				{
-					// Iterate through the "items" array
-					var itemsArrayEnumerator = element.GetProperty("items").EnumerateArray();
-					foreach (var itemElement in itemsArrayEnumerator)
+					// Console.WriteLine($"Group: {parameter.group}");
+					
+					foreach (var item in parameter.items)
 					{
-						// Access properties of each item
-						// Can be done in the scope with the rest of the logic as well tbh
-						var title = itemElement.GetProperty("titleEN").GetString();
-						var unit = itemElement.GetProperty("unit").GetString(); // Might be left unused for now
-						var ratio = itemElement.GetProperty("ratio").GetDecimal();
-
-						// Iterate through the "registers" array
-						var registersArrayEnumerator = itemElement.GetProperty("registers").EnumerateArray();
-						foreach (var registerElement in registersArrayEnumerator)
+						if (item.registers.Count() > 1)
 						{
-							var found = registerElement.GetString().Contains(hexpos);
-
-							// TODO: implement 2-byte value processing
-							if (registersArrayEnumerator.Count() > 1)
-							{
-								// Processing multi-byte registers
-								var jsonElementsArray = registersArrayEnumerator.ToArray();
+							if (item.registers[0].Contains(hexpos))
+							{ // Some special multi-byte code might be needed
 								
-								// Everyone treats 2-byte fields as 1-byte, and so will I
-								// Actual handling mechanism is required for that though
-								if (found)
-									Console.WriteLine(
-										$"Title: \"{title}\", registers: {string.Join("; ", jsonElementsArray)}, value: {intFrameValue * ratio}{unit}");
+								// selectedSubstring = hexString.Substring(p1, p2 - p1 );
+								// intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
+								Console.WriteLine(
+									$"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
 							}
-							else
+						}
+						else
+						{
+							if (item.registers[0].Contains(hexpos))
 							{
-								// Processing single-byte registers
-								if (found)
-									Console.WriteLine(
-										$"Title: \"{title}\", registers: {registerElement}, value: {intFrameValue * ratio}{unit}");
+								Console.WriteLine(
+									$"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom}");
 							}
 						}
 					}
 				}
-
 				// frameInfoArr.Append(frameInfoTemp);
 				processingIterations++;
 			}
 		}
+		
 
 		return frameInfoTemp; //CheckFrameInfoJson(frameInfoArr);
+	}
+
+	public YamlRootObject ReadConfig()
+	{
+		// TODO: make a GUI config file selector
+		string configFile = File.ReadAllText("InverterConfigs/deye_hybrid.yaml");
+				
+		var deserializer = new DeserializerBuilder().Build();
+		var config = deserializer.Deserialize<YamlRootObject>(configFile);
+		
+		return config;
 	}
 }
