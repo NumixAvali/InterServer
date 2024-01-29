@@ -152,11 +152,18 @@ public class DataProcessor
 		FrameInfo[] frameInfoArr = new FrameInfo[] { };
 		FrameInfo frameInfoTemp = new FrameInfo();
 		
+		InnerFrameInfo placeholder1 = new InnerFrameInfo();
+		InnerFrameInfo placeholder2 = new InnerFrameInfo();
+		InnerFrameInfo placeholder3 = new InnerFrameInfo();
+
+		placeholder1.value = 12851;
+		placeholder1.value = 12337;
+		placeholder1.value = 12596;
 		// Some example values, so it's not completely useless
 		// TODO: finish proper frame analysis
-		frameInfoTemp.Fault3 = 12851;
-		frameInfoTemp.Fault4 = 12337;
-		frameInfoTemp.Fault5 = 12596;
+		frameInfoTemp.Fault3 = placeholder1;
+		frameInfoTemp.Fault4 = placeholder2;
+		frameInfoTemp.Fault5 = placeholder3;
 		
 		// Those are taken from the config file, no touchy
 		byte[] pini = {0x0003};

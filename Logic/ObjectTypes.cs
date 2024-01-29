@@ -35,6 +35,7 @@ public class RequestJson
 
 public class ReplyJson
 {
+	public string status { get; set; }
 	public string message { get; set; }
 	public string? data { get; set; }
 }
@@ -45,53 +46,61 @@ public class DataJson
 	public string data { get; set; }
 }
 
+public class InnerFrameInfo
+{
+	public string title { get; set; }
+	public string unit { get; set; }
+	public float scale { get; set; }
+	public float value { get; set; }
+}
+
 public class FrameInfo
 {
 	// TODO: turn every property into an object with value, data unit, and value modifier 
-	public int Fault3 { get; set; }
-	public int Fault4 { get; set; }
-	public int Fault5 { get; set; }
-	public float OutputReactivePower { get; set; }
-	public float L1Voltage { get; set; }
-	public float L2Voltage { get; set; }
-	public float L3Voltage { get; set; }
-	public float L3Current { get; set; }
-	public int TotalGenerationTimeHours { get; set; }
-	public int TotalGenerationTimeMinutes { get; set; }
-	public float BusVoltage { get; set; }
-	public float Pv1VoltageSample { get; set; }
-	public float Pv1CurrentSample { get; set; }
-	public int CountdownTime { get; set; }
-	public int InverterAlertMessage { get; set; }
-	public int InputMode { get; set; }
-	public int CommunicationBoardInnerMessage { get; set; }
-	public int InsulationPv1PositiveGnd { get; set; }
-	public int InsulationPv2PositiveGnd { get; set; }
-	public int InsulationPvNegativeGnd { get; set; }
-	public int Country { get; set; }
-	public string InverterStatus { get; set; }
-	public float DailyBatteryCharge { get; set; }
-	public float DailyBatteryDischarge { get; set; }
-	public float GridFrequency { get; set; }
-	public float DailyConsumption { get; set; }
-	public float TotalConsumption { get; set; }
-	public float DcTemperature { get; set; }
-	public float AcTemperature { get; set; }
-	public float TotalProduction { get; set; }
-	public float DailyProduction { get; set; }
-	public float Pv1Voltage { get; set; }
-	public float Pv1Current { get; set; }
-	public float Pv2Voltage { get; set; }
-	public float Pv2Current { get; set; }
-	public float L1Current { get; set; }
-	public float L2Current { get; set; }
-	public float L1LoadPower { get; set; }
-	public float L2LoadPower { get; set; }
-	public int OutputActivePower { get; set; }
-	public int BatterySoc { get; set; }
-	public int Pv1Power { get; set; }
-	public int Pv2Power { get; set; }
-	public int BatteryPower { get; set; }
+	public InnerFrameInfo Fault3 { get; set; }
+	public InnerFrameInfo Fault4 { get; set; }
+	public InnerFrameInfo Fault5 { get; set; }
+	public InnerFrameInfo OutputReactivePower { get; set; }
+	public InnerFrameInfo L1Voltage { get; set; }
+	public InnerFrameInfo L2Voltage { get; set; }
+	public InnerFrameInfo L3Voltage { get; set; }
+	public InnerFrameInfo L3Current { get; set; }
+	public InnerFrameInfo TotalGenerationTimeHours { get; set; }
+	public InnerFrameInfo TotalGenerationTimeMinutes { get; set; }
+	public InnerFrameInfo BusVoltage { get; set; }
+	public InnerFrameInfo Pv1VoltageSample { get; set; }
+	public InnerFrameInfo Pv1CurrentSample { get; set; }
+	public InnerFrameInfo CountdownTime { get; set; }
+	public InnerFrameInfo InverterAlertMessage { get; set; }
+	public InnerFrameInfo InputMode { get; set; }
+	public InnerFrameInfo CommunicationBoardInnerMessage { get; set; }
+	public InnerFrameInfo InsulationPv1PositiveGnd { get; set; }
+	public InnerFrameInfo InsulationPv2PositiveGnd { get; set; }
+	public InnerFrameInfo InsulationPvNegativeGnd { get; set; }
+	public InnerFrameInfo Country { get; set; }
+	public InnerFrameInfo InverterStatus { get; set; }
+	public InnerFrameInfo DailyBatteryCharge { get; set; }
+	public InnerFrameInfo DailyBatteryDischarge { get; set; }
+	public InnerFrameInfo GridFrequency { get; set; }
+	public InnerFrameInfo DailyConsumption { get; set; }
+	public InnerFrameInfo TotalConsumption { get; set; }
+	public InnerFrameInfo DcTemperature { get; set; }
+	public InnerFrameInfo AcTemperature { get; set; }
+	public InnerFrameInfo TotalProduction { get; set; }
+	public InnerFrameInfo DailyProduction { get; set; }
+	public InnerFrameInfo Pv1Voltage { get; set; }
+	public InnerFrameInfo Pv1Current { get; set; }
+	public InnerFrameInfo Pv2Voltage { get; set; }
+	public InnerFrameInfo Pv2Current { get; set; }
+	public InnerFrameInfo L1Current { get; set; }
+	public InnerFrameInfo L2Current { get; set; }
+	public InnerFrameInfo L1LoadPower { get; set; }
+	public InnerFrameInfo L2LoadPower { get; set; }
+	public InnerFrameInfo OutputActivePower { get; set; }
+	public InnerFrameInfo BatterySoc { get; set; }
+	public InnerFrameInfo Pv1Power { get; set; }
+	public InnerFrameInfo Pv2Power { get; set; }
+	public InnerFrameInfo BatteryPower { get; set; }
 }
 
 // I'm so sorry for the naming scheme in that class.
