@@ -35,23 +35,23 @@ public class RequestJson
 
 public class ReplyJson
 {
-	public string status { get; set; }
-	public string message { get; set; }
-	public string? data { get; set; }
+	public required ResponseType Status { get; set; }
+	public required string Message { get; set; }
+	public FrameInfo? Data { get; set; }
 }
 
 public class DataJson
 {
-	public ResponseType dataState { get; set; }
-	public string data { get; set; }
+	public required ResponseType Status { get; set; }
+	public required string Data { get; set; }
 }
 
 public class InnerFrameInfo
 {
-	public string title { get; set; }
-	public string unit { get; set; }
-	public float scale { get; set; }
-	public float value { get; set; }
+	public string Title { get; set; }
+	public string Unit { get; set; }
+	public float Scale { get; set; }
+	public float Value { get; set; }
 }
 
 public class FrameInfo

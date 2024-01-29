@@ -21,7 +21,7 @@
         @{
             var response =  new RequestHandler().ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData); //"Here should be a graph with some cached data, taken from DB.";
             //JsonSerializer.Serialize(response)
-            @response.data
+            @response.Data
         }
     </p>
     <button class="btn-lg" onclick="refreshBtnClick()">Refresh</button>

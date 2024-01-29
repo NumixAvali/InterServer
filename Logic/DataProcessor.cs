@@ -152,13 +152,19 @@ public class DataProcessor
 		FrameInfo[] frameInfoArr = new FrameInfo[] { };
 		FrameInfo frameInfoTemp = new FrameInfo();
 		
-		InnerFrameInfo placeholder1 = new InnerFrameInfo();
-		InnerFrameInfo placeholder2 = new InnerFrameInfo();
-		InnerFrameInfo placeholder3 = new InnerFrameInfo();
+		InnerFrameInfo placeholder1 = new InnerFrameInfo
+		{
+			Value = 12851
+		};
+		InnerFrameInfo placeholder2 = new InnerFrameInfo
+		{
+			Value = 12337
+		};
+		InnerFrameInfo placeholder3 = new InnerFrameInfo
+		{
+			Value = 12596
+		};
 
-		placeholder1.value = 12851;
-		placeholder1.value = 12337;
-		placeholder1.value = 12596;
 		// Some example values, so it's not completely useless
 		// TODO: finish proper frame analysis
 		frameInfoTemp.Fault3 = placeholder1;

@@ -21,13 +21,19 @@ public class RequestHandler
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
 		
-		string responseStr = "Internal error!";
-		string dataResponse = sillyCat;
 		DataJson preFinalJson = new DataJson()
 		{
-			dataState = ResponseType.UnknownError,
-			data = sillyCat,
+			Status = ResponseType.UnknownError,
+			Data = sillyCat,
 		};
+		
+		var reply = new ReplyJson
+		{
+			Status = ResponseType.UnknownError,
+			Message = "Internal error!",
+			Data = null
+		};
+
 
 		Dictionary<ResponseType, string> responseMessages = new Dictionary<ResponseType, string>
 		{
@@ -49,7 +55,7 @@ public class RequestHandler
 		
 		if (responseMessages.TryGetValue(responseType, out var message))
 		{
-			responseStr = message;
+			reply.Message = message;
 		}
 		
 		if (responseDataType.TryGetValue(dataType, out var dataMessage))
@@ -57,41 +63,37 @@ public class RequestHandler
 			preFinalJson = dataMessage;
 		}
 
-
-		var reply = new ReplyJson
-		{
-			message = responseStr,
-			data = dataResponse
-		};
-
-		switch (preFinalJson.dataState)
+		switch (preFinalJson.Status)
 		{
 			case ResponseType.Ok:
 			{
-				reply.message = responseMessages[ResponseType.Ok];
-				reply.data = preFinalJson.data;
+				reply.Status = ResponseType.Ok;
+				reply.Message = responseMessages[ResponseType.Ok];
+				reply.Data = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data) ;
 				break;
 			}
 			case ResponseType.InternalError:
 			{
-				reply.message = responseMessages[ResponseType.InternalError];
-				reply.data = responseDataType[ReplyDataType.NoData].data;
+				reply.Status = ResponseType.InternalError;
+				reply.Message = responseMessages[ResponseType.InternalError];
+				reply.Data = null;
 				break;
 			}
 			case ResponseType.ConnectionError:
 			{
-				reply.message = responseMessages[ResponseType.ConnectionError];
-				reply.data = responseDataType[ReplyDataType.NoData].data;
+				reply.Status = ResponseType.ConnectionError;
+				reply.Message = responseMessages[ResponseType.ConnectionError];
+				reply.Data = null;
 				break;
 			}
 			default:
 			{
-				reply.message = responseMessages[ResponseType.UnknownError];
-				reply.data = responseDataType[ReplyDataType.NoData].data;
+				reply.Status = ResponseType.UnknownError;
+				reply.Message = responseMessages[ResponseType.UnknownError];
+				reply.Data = null;
 				break;
 			}
 		}
-
 		
 		return reply;
 	}
@@ -114,13 +116,14 @@ public class RequestHandler
 		
 		DataProcessor dataProcessor = new DataProcessor();
 		FrameInfo digestedInfo = new FrameInfo();
-		DataJson internalDataJson = new DataJson();
+		DataJson internalDataJson = new DataJson
+		{
+			Status = ResponseType.UnknownError,
+			Data = sillyCat
+		};
 		
 		const string inverterIp = "192.168.2.211";
 		const int inverterPort = 8899;
-
-		internalDataJson.dataState = ResponseType.UnknownError;
-		internalDataJson.data = sillyCat;
 		
 		//TCP client
 		using (TcpClient tcpClient = new TcpClient())
@@ -165,8 +168,8 @@ public class RequestHandler
 				}
 
 
-				internalDataJson.data = JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
-				internalDataJson.dataState = ResponseType.Ok;
+				internalDataJson.Data = JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
+				internalDataJson.Status = ResponseType.Ok;
 			}
 			catch (Exception ex)
 			{
@@ -174,13 +177,13 @@ public class RequestHandler
 				Console.WriteLine(ex);
 				if (ex.Message == "connection timeout or something")
 				{
-					internalDataJson.data = ex.Message;
-					internalDataJson.dataState = ResponseType.ConnectionError;
+					internalDataJson.Data = ex.Message;
+					internalDataJson.Status = ResponseType.ConnectionError;
 				}
 				else
 				{
-					internalDataJson.data = ex.Message;
-					internalDataJson.dataState = ResponseType.InternalError;
+					internalDataJson.Data = ex.Message;
+					internalDataJson.Status = ResponseType.InternalError;
 				}
 				
 			}
@@ -207,8 +210,8 @@ public class RequestHandler
 
 		DataJson dataJson = new DataJson
 		{
-			dataState = ResponseType.Ok,
-			data = otherSillyCat
+			Status = ResponseType.Ok,
+			Data = otherSillyCat
 		};
 		return dataJson;
 	}
