@@ -5,26 +5,134 @@
 <h1>@ViewData["Title"]</h1>
 
 <br/>
+<h4>Navigation</h4>
+<nav>
+    <ul>
+        <li><a href="#ApiSection">API Endpoints</a></li>
+        <li><a href="#JsonSection">JSON Reply Structure</a></li>
+        <li><a href="#HardwareSection">Supported Hardware</a></li>
+    </ul>
+</nav>
 
-<h4>1. Test Endpoint</h4>
-<p>
-    <strong>Endpoint:</strong> /api/v1/test<br>
-    <strong>Method:</strong> GET<br>
-    <strong>Description:</strong> This endpoint is for testing purposes.
-</p>
+<section id="ApiSection">
+    <h3>Endpoints</h3><br/>
+    
+    <h4>1. Test Endpoint</h4>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/test<br>
+        <strong>Method:</strong> GET<br>
+        <strong>Description:</strong> This endpoint is for testing purposes.
+    </p>
+    
+    <h4>2. Get Data Endpoint</h4>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/get-data<br>
+        <strong>Method:</strong> GET<br>
+        <strong>Description:</strong> This endpoint retrieves data from the server.
+    </p>
+    
+    <h4>3. Get Cache Endpoint</h4>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/get-cache<br>
+        <strong>Method:</strong> GET<br>
+        <strong>Description:</strong> This endpoint retrieves data from the cache.
+    </p>
+</section>
 
-<h4>2. Get Data Endpoint</h4>
-<p>
-    <strong>Endpoint:</strong> /api/v1/get-data<br>
-    <strong>Method:</strong> GET<br>
-    <strong>Description:</strong> This endpoint retrieves data from the server.
-</p>
+<section id="JsonSection">
+    <h3>JSON reply</h3><br/>
+    
+    JSON reply consists of the following fields:
+    <ul>
+        <li><strong>Status</strong> - The <i>ResponseType</i> field, meant to be parsed by code.</li>
+        <li><strong>Message</strong> - Human-readable message about the reply status.</li>
+        <li><strong>Data</strong> - Actual data from the hardware in JSON format.</li>
+    </ul><br/>
+    Every Data field reply fields consist of <i>InnerFrameInfo</i>, which have the following fields:
+    <ul>
+        <li><strong>Title</strong> - Human-readable name of the field</li>
+        <li><strong>Unit</strong> - Unit of measurement</li>
+        <li><strong>Scale</strong> - Multiplier value to get the correct decimal value</li>
+        <li><strong>Value</strong> - Value itself</li>
+    </ul><br/>
+    <i>FrameInfo</i> Object itself contains a lot of data fields, that were taken from the hardware. Complete list of them is the following:
+    <ul>
+        <li><strong>BatteryStatus:</strong> Information about the battery status.</li>
+        <li><strong>BatteryCurrent:</strong> Current battery level information.</li>
+        <li><strong>LoadVoltage:</strong> Voltage information related to the load.</li>
+        <li><strong>SmartLoadEnableStatus:</strong> Status of the smart load enable feature.</li>
+        <li><strong>GridConnectedStatus:</strong> Status indicating whether the system is connected to the grid.</li>
+        <li><strong>UsageTime:</strong> Duration of system usage.</li>
+        <li><strong>Alert:</strong> Information about any system alerts.</li>
+        <li><strong>WorkMode:</strong> Current operational mode of the system.</li>
+        <li><strong>CommunicationBoardVersion:</strong> Version information for the communication board.</li>
+        <li><strong>ControlBoardVersion:</strong> Version information for the control board.</li>
+        <li><strong>InverterStatus:</strong> Status information about the inverter.</li>
+        <li><strong>DailyBatteryCharge:</strong> Daily battery charging information.</li>
+        <li><strong>DailyBatteryDischarge:</strong> Daily battery discharge information.</li>
+        <li><strong>TotalBatteryCharge:</strong> Total battery charging information.</li>
+        <li><strong>TotalBatteryDischarge:</strong> Total battery discharge information.</li>
+        <li><strong>DailyEnergyBought:</strong> Daily energy bought from external sources.</li>
+        <li><strong>DailyEnergySold:</strong> Daily energy sold to external sources.</li>
+        <li><strong>TotalEnergyBought:</strong> Total energy bought from external sources.</li>
+        <li><strong>TotalEnergySold:</strong> Total energy sold to external sources.</li>
+        <li><strong>GridFrequency:</strong> Frequency of the grid.</li>
+        <li><strong>DailyLoadConsumption:</strong> Daily load consumption information.</li>
+        <li><strong>TotalLoadConsumption:</strong> Total load consumption information.</li>
+        <li><strong>DcTemperature:</strong> Temperature information for the DC side.</li>
+        <li><strong>AcTemperature:</strong> Temperature information for the AC side.</li>
+        <li><strong>TotalProduction:</strong> Total energy production information.</li>
+        <li><strong>DailyProduction:</strong> Daily energy production information.</li>
+        <li><strong>GridL1Current:</strong> Current information for Grid Line 1.</li>
+        <li><strong>GridL2Current:</strong> Current information for Grid Line 2.</li>
+        <li><strong>LoadL1Power:</strong> Power information for Load Line 1.</li>
+        <li><strong>LoadL2Power:</strong> Power information for Load Line 2.</li>
+        <li><strong>InverterL1Power:</strong> Power information for Inverter Line 1.</li>
+        <li><strong>InverterL2Power:</strong> Power information for Inverter Line 2.</li>
+        <li><strong>InternalL1LoadPower:</strong> Power information for Internal Load Line 1.</li>
+        <li><strong>InternalL2LoadPower:</strong> Power information for Internal Load Line 2.</li>
+        <li><strong>ExternalL1LoadPower:</strong> Power information for External Load Line 1.</li>
+        <li><strong>ExternalL2LoadPower:</strong> Power information for External Load Line 2.</li>
+        <li><strong>GridL1Voltage:</strong> Voltage information for Grid Line 1.</li>
+        <li><strong>GridL2Voltage:</strong> Voltage information for Grid Line 2.</li>
+        <li><strong>GenPower:</strong> Power information for the generator.</li>
+        <li><strong>GenConnectedStatus:</strong> Status indicating whether the generator is connected.</li>
+        <li><strong>MicroInverterPower:</strong> Power information for the microinverter.</li>
+        <li><strong>BatterySoc:</strong> State of charge information for the battery.</li>
+        <li><strong>Pv1Voltage:</strong> Voltage information for Photovoltaic (PV) Panel 1.</li>
+        <li><strong>Pv1Current:</strong> Current information for Photovoltaic (PV) Panel 1.</li>
+        <li><strong>Pv1Power:</strong> Power information for Photovoltaic (PV) Panel 1.</li>
+        <li><strong>Pv2Power:</strong> Power information for Photovoltaic (PV) Panel 2.</li>
+        <li><strong>Pv2Voltage:</strong> Voltage information for Photovoltaic (PV) Panel 2.</li>
+        <li><strong>Pv2Current:</strong> Current information for Photovoltaic (PV) Panel 2.</li>
+        <li><strong>BatteryPower:</strong> Power information for the battery.</li>
+    </ul>
+</section>
 
-<h4>3. Get Cache Endpoint</h4>
-<p>
-    <strong>Endpoint:</strong> /api/v1/get-cache<br>
-    <strong>Method:</strong> GET<br>
-    <strong>Description:</strong> This endpoint retrieves data from the cache.
-</p>
+<section id="HardwareSection">
+    <h3>Supported hardware</h3><br/>
+    This section is incomplete. Current set of config files for inverters is the following:
+    <ul>
+        <li>deye_2mppt.yaml</li>
+        <li>deye_4mppt.yaml</li>
+        <li>deye_hybrid.yaml</li>
+        <li>deye_sg04lp3.yaml</li>
+        <li>deye_string.yaml</li>
+        <li>hyd-zss-hp-3k-6k.yaml</li>
+        <li>kstar_hybrid.yaml</li>
+        <li>sofar_g3hyd.yaml</li>
+        <li>sofar_hyd3k-6k-es.yaml</li>
+        <li>sofar_Isw3.yaml</li>
+        <li>sofar_wifikit.yaml</li>
+        <li>solis_1p8k-5g.yaml</li>
+        <li>solis_3p-4g.yaml</li>
+        <li>solis_hybrid.yaml</li>
+        <li>solis_s6-grip.yaml</li>
+        <li>zcs_azzurro-ktl-v3.yaml</li>
+    </ul>
+</section>
+
+
+
 
 <!-- TODO: Add more endpoints as needed -->
