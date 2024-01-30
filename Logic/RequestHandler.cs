@@ -7,8 +7,6 @@ public class RequestHandler
 {
 	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData)
 	{
-		// TODO: passed arguments are must be a suggestion at this point.
-		// Internal logic should be able to determine final answer itself. 
 		const string sillyCat =
 			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿

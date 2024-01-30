@@ -84,40 +84,6 @@ public class DataProcessor
 	    return val;
     }
 
-    private static FrameInfo MergeFrameInfos(List<FrameInfo> frameInfos)
-    {
-	    if (frameInfos == null || frameInfos.Count == 0)
-	    {
-		    throw new ArgumentException("List cannot be null or empty.");
-	    }
-
-	    FrameInfo mergedFrameInfo = new FrameInfo();
-
-	    // Get the properties of the class
-	    var properties = typeof(FrameInfo).GetProperties();
-
-	    foreach (var property in properties)
-	    {
-		    // Check if the property is of type InnerFrameInfo
-		    if (property.PropertyType == typeof(InnerFrameInfo))
-		    {
-			    // Create a list to store non-null InnerFrameInfo objects
-			    var innerFrameInfos = frameInfos
-				    .Select(frameInfo => (InnerFrameInfo)property.GetValue(frameInfo))
-				    .Where(innerFrameInfo => innerFrameInfo != null)
-				    .ToList();
-
-			    // If the list is not empty, choose the one with the highest value
-			    if (innerFrameInfos.Count > 0)
-			    {
-				    var maxInnerFrameInfo = innerFrameInfos.OrderByDescending(inner => inner.Value).First();
-				    property.SetValue(mergedFrameInfo, maxInnerFrameInfo);
-			    }
-		    }
-	    }
-
-	    return mergedFrameInfo;
-    }
 	public byte[] ConstructFrame(int sequence = 1)
 	{
 		/*
@@ -180,8 +146,6 @@ public class DataProcessor
 
 	public FrameInfo DigestResponse(List<byte[]> frameList)
 	{
-		List<FrameInfo> frameInfoList = new List<FrameInfo>();
-		
 		// This is clearly a bad practice, and probably can be done much better.
 		// I don't really know how, and maybe at some point in the future I'll make it not terrible!
 		var frameInfoTemp = new FrameInfo
@@ -253,7 +217,7 @@ public class DataProcessor
 		{
 			var processingIterations = 0;
 			var i = config.requests[requestIterations].end - config.requests[requestIterations].start;
-			Console.WriteLine("===FRAME START===");
+			// Console.WriteLine("===FRAME START===");
 			while (processingIterations <= i)
 			{
 				var p1 = 56 + processingIterations * 4;
@@ -280,7 +244,7 @@ public class DataProcessor
 							if (item.registers[0].Contains(hexpos))
 							{ // Some special multi-byte code might be needed
 								
-								Console.WriteLine($"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
+								// Console.WriteLine($"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
 								
 								foreach (var property in frameInfoTemp.GetType().GetProperties())
 								{
@@ -301,7 +265,7 @@ public class DataProcessor
 						{
 							if (item.registers[0].Contains(hexpos))
 							{
-								Console.WriteLine($"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
+								// Console.WriteLine($"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
 								
 								foreach (var property in frameInfoTemp.GetType().GetProperties())
 								{
@@ -324,7 +288,6 @@ public class DataProcessor
 			}
 			// Console.WriteLine("===FRAME END===");
 			requestIterations++;
-			frameInfoList.Add(frameInfoTemp);
 		}
 		
 
