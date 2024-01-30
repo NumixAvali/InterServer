@@ -192,8 +192,8 @@ public class DataProcessor
 				LoadL2Power = new InnerFrameInfo { Title = "Load L2 Power" },
 				InverterL1Power = new InnerFrameInfo { Title = "Inverter L1 Power" },
 				InverterL2Power = new InnerFrameInfo { Title = "Inverter L2 Power" },
-				TotalGenerationTimeHours = new InnerFrameInfo { Title = "" },
-				TotalGenerationTimeMinutes = new InnerFrameInfo { Title = "" },
+				BatteryStatus = new InnerFrameInfo { Title = "Battery Status" },
+				BatteryCurrent = new InnerFrameInfo { Title = "Battery Current" },
 				LoadVoltage = new InnerFrameInfo { Title = "Load Voltage" },
 				SmartLoadEnableStatus = new InnerFrameInfo { Title = "SmartLoad Enable Status" },
 				GridConnectedStatus = new InnerFrameInfo { Title = "Grid-connected Status" },
@@ -229,6 +229,7 @@ public class DataProcessor
 				ExternalL1LoadPower = new InnerFrameInfo { Title = "External CT L1 Power" },
 				ExternalL2LoadPower = new InnerFrameInfo { Title = "External CT L2 Power" },
 				GenPower = new InnerFrameInfo { Title = "Gen Power" },
+				GenConnectedStatus = new InnerFrameInfo { Title = "Gen-connected Status" },
 				MicroInverterPower = new InnerFrameInfo { Title = "Micro-inverter Power" },
 				BatterySoc = new InnerFrameInfo { Title = "Battery SOC" },
 				Pv1Power = new InnerFrameInfo { Title = "PV1 Power" },
@@ -252,7 +253,7 @@ public class DataProcessor
 		{
 			var processingIterations = 0;
 			var i = config.requests[requestIterations].end - config.requests[requestIterations].start;
-			// Console.WriteLine("===FRAME START===");
+			Console.WriteLine("===FRAME START===");
 			while (processingIterations <= i)
 			{
 				var p1 = 56 + processingIterations * 4;
@@ -279,7 +280,7 @@ public class DataProcessor
 							if (item.registers[0].Contains(hexpos))
 							{ // Some special multi-byte code might be needed
 								
-								// Console.WriteLine($"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
+								Console.WriteLine($"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
 								
 								foreach (var property in frameInfoTemp.GetType().GetProperties())
 								{
@@ -300,7 +301,7 @@ public class DataProcessor
 						{
 							if (item.registers[0].Contains(hexpos))
 							{
-								// Console.WriteLine($"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
+								Console.WriteLine($"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
 								
 								foreach (var property in frameInfoTemp.GetType().GetProperties())
 								{

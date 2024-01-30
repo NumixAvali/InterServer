@@ -56,8 +56,8 @@ public class InnerFrameInfo
 
 public class FrameInfo
 {
-	public InnerFrameInfo TotalGenerationTimeHours { get; set; }
-	public InnerFrameInfo TotalGenerationTimeMinutes { get; set; }
+	public InnerFrameInfo BatteryStatus { get; set; }
+	public InnerFrameInfo BatteryCurrent { get; set; }
 	public InnerFrameInfo LoadVoltage { get; set; }
 	public InnerFrameInfo SmartLoadEnableStatus { get; set; }
 	public InnerFrameInfo GridConnectedStatus { get; set; }
@@ -95,6 +95,7 @@ public class FrameInfo
 	public InnerFrameInfo GridL1Voltage { get; set; }
 	public InnerFrameInfo GridL2Voltage { get; set; }
 	public InnerFrameInfo GenPower { get; set; }
+	public InnerFrameInfo GenConnectedStatus { get; set; }
 	public InnerFrameInfo MicroInverterPower { get; set; }
 	public InnerFrameInfo BatterySoc { get; set; }
 	public InnerFrameInfo Pv1Voltage { get; set; }
