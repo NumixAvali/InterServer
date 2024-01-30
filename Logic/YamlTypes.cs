@@ -18,7 +18,7 @@ public class Item
     public string name { get; set; }
     public string @class { get; set; }
     public string state_class { get; set; }
-    public string uom { get; set; }
+    public string? uom { get; set; }
     public float scale { get; set; }
     public int rule { get; set; }
     public List<string> registers { get; set; }

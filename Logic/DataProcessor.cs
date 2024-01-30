@@ -252,7 +252,7 @@ public class DataProcessor
 		{
 			var processingIterations = 0;
 			var i = config.requests[requestIterations].end - config.requests[requestIterations].start;
-			Console.WriteLine("===FRAME START===");
+			// Console.WriteLine("===FRAME START===");
 			while (processingIterations <= i)
 			{
 				var p1 = 56 + processingIterations * 4;
@@ -279,25 +279,49 @@ public class DataProcessor
 							if (item.registers[0].Contains(hexpos))
 							{ // Some special multi-byte code might be needed
 								
-								// selectedSubstring = hexString.Substring(p1, p2 - p1 );
-								// intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
-								Console.WriteLine(
-									$"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
+								// Console.WriteLine($"Title: \"{item.name}\", registers: {String.Join("; ", item.registers)}, value: {intFrameValue * item.scale}{item.uom}");
+								
+								foreach (var property in frameInfoTemp.GetType().GetProperties())
+								{
+									// Get the nested InnerFrameInfo object
+									InnerFrameInfo innerFrameInfo = (InnerFrameInfo)property.GetValue(frameInfoTemp);
+
+									if (innerFrameInfo.Title == item.name)
+									{
+										// Console.WriteLine($"Found matching property: {property.Name} - multi-byte");
+										innerFrameInfo.Value = intFrameValue;
+										innerFrameInfo.Scale = item.scale;
+										innerFrameInfo.Unit = item.uom;
+									}
+								}
 							}
 						}
 						else
 						{
 							if (item.registers[0].Contains(hexpos))
 							{
-								Console.WriteLine(
-									$"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
+								// Console.WriteLine($"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
+								
+								foreach (var property in frameInfoTemp.GetType().GetProperties())
+								{
+									// Get the nested InnerFrameInfo object
+									InnerFrameInfo innerFrameInfo = (InnerFrameInfo)property.GetValue(frameInfoTemp);
+
+									if (innerFrameInfo.Title == item.name)
+									{
+										// Console.WriteLine($"Found matching property: {property.Name} - single-byte");
+										innerFrameInfo.Value = intFrameValue;
+										innerFrameInfo.Scale = item.scale;
+										innerFrameInfo.Unit = item.uom;
+									}
+								}
 							}
 						}
 					}
 				}
 				processingIterations++;
 			}
-			Console.WriteLine("===FRAME END===");
+			// Console.WriteLine("===FRAME END===");
 			requestIterations++;
 			frameInfoList.Add(frameInfoTemp);
 		}

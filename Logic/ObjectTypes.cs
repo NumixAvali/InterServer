@@ -49,7 +49,7 @@ public class DataJson
 public class InnerFrameInfo
 {
 	public string Title { get; set; }
-	public string Unit { get; set; }
+	public string? Unit { get; set; }
 	public float Scale { get; set; }
 	public float Value { get; set; }
 }
