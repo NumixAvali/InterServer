@@ -64,7 +64,7 @@ public class FrameInfo
 	public InnerFrameInfo UsageTime { get; set; }
 	public InnerFrameInfo Alert { get; set; }
 	public InnerFrameInfo WorkMode { get; set; }
-	public InnerFrameInfo CommunicationBoardVesrion { get; set; }
+	public InnerFrameInfo CommunicationBoardVersion { get; set; }
 	public InnerFrameInfo ControlBoardVersion { get; set; }
 	public InnerFrameInfo InverterStatus { get; set; }
 	public InnerFrameInfo DailyBatteryCharge { get; set; }
@@ -73,8 +73,8 @@ public class FrameInfo
 	public InnerFrameInfo TotalBatteryDischarge { get; set; }
 	public InnerFrameInfo DailyEnergyBought { get; set; }
 	public InnerFrameInfo DailyEnergySold { get; set; }
-	public InnerFrameInfo TotalEnegryBought { get; set; }
-	public InnerFrameInfo TotalEnegrySold { get; set; }
+	public InnerFrameInfo TotalEnergyBought { get; set; }
+	public InnerFrameInfo TotalEnergySold { get; set; }
 	public InnerFrameInfo GridFrequency { get; set; }
 	public InnerFrameInfo DailyLoadConsumption { get; set; }
 	public InnerFrameInfo TotalLoadConsumption { get; set; }
