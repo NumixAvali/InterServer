@@ -73,7 +73,9 @@ public class DataProcessor
 	    }
 	    int bits = 16;
 	    int val = Convert.ToInt32(hexval, bits);
-            
+	    
+	    // No idea, what that is, and why is it needed!
+	    // Original script had something like that, and I'm leaving it just in case.
 	    if ((val & (1 << (bits - 1))) != 0)
 	    {
 		    val -= 1 << bits;
@@ -82,10 +84,39 @@ public class DataProcessor
 	    return val;
     }
 
-    private FrameInfo CheckFrameInfoJson(FrameInfo[] framesArr)
+    private static FrameInfo MergeFrameInfos(List<FrameInfo> frameInfos)
     {
-	    // TODO: make object array comparison
-	    return framesArr[0];
+	    if (frameInfos == null || frameInfos.Count == 0)
+	    {
+		    throw new ArgumentException("List cannot be null or empty.");
+	    }
+
+	    FrameInfo mergedFrameInfo = new FrameInfo();
+
+	    // Get the properties of the class
+	    var properties = typeof(FrameInfo).GetProperties();
+
+	    foreach (var property in properties)
+	    {
+		    // Check if the property is of type InnerFrameInfo
+		    if (property.PropertyType == typeof(InnerFrameInfo))
+		    {
+			    // Create a list to store non-null InnerFrameInfo objects
+			    var innerFrameInfos = frameInfos
+				    .Select(frameInfo => (InnerFrameInfo)property.GetValue(frameInfo))
+				    .Where(innerFrameInfo => innerFrameInfo != null)
+				    .ToList();
+
+			    // If the list is not empty, choose the one with the highest value
+			    if (innerFrameInfos.Count > 0)
+			    {
+				    var maxInnerFrameInfo = innerFrameInfos.OrderByDescending(inner => inner.Value).First();
+				    property.SetValue(mergedFrameInfo, maxInnerFrameInfo);
+			    }
+		    }
+	    }
+
+	    return mergedFrameInfo;
     }
 	public byte[] ConstructFrame(int sequence = 1)
 	{
@@ -149,27 +180,65 @@ public class DataProcessor
 
 	public FrameInfo DigestResponse(List<byte[]> frameList)
 	{
-		FrameInfo[] frameInfoArr = new FrameInfo[] { };
-		FrameInfo frameInfoTemp = new FrameInfo();
+		List<FrameInfo> frameInfoList = new List<FrameInfo>();
 		
-		InnerFrameInfo placeholder1 = new InnerFrameInfo
+		// This is clearly a bad practice, and probably can be done much better.
+		// I don't really know how, and maybe at some point in the future I'll make it not terrible!
+		var frameInfoTemp = new FrameInfo
 		{
-			Value = 12851
+				GridL1Voltage = new InnerFrameInfo { Title = "Grid Voltage L1" },
+				GridL2Voltage = new InnerFrameInfo { Title = "Grid Voltage L2" },
+				LoadL1Power = new InnerFrameInfo { Title = "Load L1 Power" },
+				LoadL2Power = new InnerFrameInfo { Title = "Load L2 Power" },
+				InverterL1Power = new InnerFrameInfo { Title = "Inverter L1 Power" },
+				InverterL2Power = new InnerFrameInfo { Title = "Inverter L2 Power" },
+				TotalGenerationTimeHours = new InnerFrameInfo { Title = "" },
+				TotalGenerationTimeMinutes = new InnerFrameInfo { Title = "" },
+				LoadVoltage = new InnerFrameInfo { Title = "Load Voltage" },
+				SmartLoadEnableStatus = new InnerFrameInfo { Title = "SmartLoad Enable Status" },
+				GridConnectedStatus = new InnerFrameInfo { Title = "Grid-connected Status" },
+				UsageTime = new InnerFrameInfo { Title = "Time of use" },
+				Alert = new InnerFrameInfo { Title = "Alert" },
+				WorkMode = new InnerFrameInfo { Title = "Work Mode" },
+				CommunicationBoardVesrion = new InnerFrameInfo { Title = "Communication Board Version No." },
+				ControlBoardVersion = new InnerFrameInfo { Title = "Control Board Version No." },
+				InverterStatus = new InnerFrameInfo { Title = "Running Status" },
+				DailyBatteryCharge = new InnerFrameInfo { Title = "Daily Battery Charge" },
+				DailyBatteryDischarge = new InnerFrameInfo { Title = "Daily Battery Discharge" },
+				TotalBatteryCharge = new InnerFrameInfo { Title = "Total Battery Charge" },
+				TotalBatteryDischarge = new InnerFrameInfo { Title = "Total Battery Discharge" },
+				DailyEnergyBought = new InnerFrameInfo { Title = "Daily Energy Bought" },
+				DailyEnergySold = new InnerFrameInfo { Title = "Daily Energy Sold" },
+				TotalEnegryBought = new InnerFrameInfo { Title = "Total Energy Bought" },
+				TotalEnegrySold = new InnerFrameInfo { Title = "Total Energy Sold" },
+				GridFrequency = new InnerFrameInfo { Title = "Grid Frequency" },
+				DailyLoadConsumption = new InnerFrameInfo { Title = "Daily Load Consumption" },
+				TotalLoadConsumption = new InnerFrameInfo { Title = "Total Load Consumption" },
+				DcTemperature = new InnerFrameInfo { Title = "DC Temperature" },
+				AcTemperature = new InnerFrameInfo { Title = "AC Temperature" },
+				TotalProduction = new InnerFrameInfo { Title = "Total Production" },
+				DailyProduction = new InnerFrameInfo { Title = "Daily Production" },
+				Pv1Voltage = new InnerFrameInfo { Title = "PV1 Voltage" },
+				Pv1Current = new InnerFrameInfo { Title = "PV1 Current" },
+				Pv2Voltage = new InnerFrameInfo { Title = "PV2 Voltage" },
+				Pv2Current = new InnerFrameInfo { Title = "PV2 Current" },
+				GridL1Current = new InnerFrameInfo { Title = "Grid Current L1" },
+				GridL2Current = new InnerFrameInfo { Title = "Grid Current L2" },
+				InternalL1LoadPower = new InnerFrameInfo { Title = "Internal CT L1 Power" },
+				InternalL2LoadPower = new InnerFrameInfo { Title = "Internal CT L2 Power" },
+				ExternalL1LoadPower = new InnerFrameInfo { Title = "External CT L1 Power" },
+				ExternalL2LoadPower = new InnerFrameInfo { Title = "External CT L2 Power" },
+				GenPower = new InnerFrameInfo { Title = "Gen Power" },
+				MicroInverterPower = new InnerFrameInfo { Title = "Micro-inverter Power" },
+				BatterySoc = new InnerFrameInfo { Title = "Battery SOC" },
+				Pv1Power = new InnerFrameInfo { Title = "PV1 Power" },
+				Pv2Power = new InnerFrameInfo { Title = "PV2 Power" },
+				BatteryPower = new InnerFrameInfo { Title = "Battery Power" }
 		};
-		InnerFrameInfo placeholder2 = new InnerFrameInfo
-		{
-			Value = 12337
-		};
-		InnerFrameInfo placeholder3 = new InnerFrameInfo
-		{
-			Value = 12596
-		};
-
-		// Some example values, so it's not completely useless
-		// TODO: finish proper frame analysis
-		frameInfoTemp.Fault3 = placeholder1;
-		frameInfoTemp.Fault4 = placeholder2;
-		frameInfoTemp.Fault5 = placeholder3;
+		
+		
+		// Read the config, and get register position addresses 
+		var config = ReadConfig(); //deserializer.Deserialize<RootObject>(configFile);
 		
 		// Those are taken from the config file, no touchy
 		byte[] pini = {0x0003};
@@ -177,17 +246,18 @@ public class DataProcessor
 		byte[] pini2 = {0x0096};
 		byte[] pfin2 = {0x00f8};
 		
+		int requestIterations = 0;
+
 		foreach (byte[] frame in frameList)
 		{
 			var processingIterations = 0;
-			var i = Convert.ToInt32(0x0070) -
-			        Convert.ToInt32(0x0003); // Apparently it's just 112-3?
-
+			var i = config.requests[requestIterations].end - config.requests[requestIterations].start;
+			Console.WriteLine("===FRAME START===");
 			while (processingIterations <= i)
 			{
 				var p1 = 56 + processingIterations * 4;
 				var p2 = 60 + processingIterations * 4;
-				var hexpos = $"0x{(processingIterations + 0x0003) & 0xFFFF:X4}";
+				var hexpos = $"0x{(processingIterations + config.requests[requestIterations].start) & 0xFFFF:X4}";
 				// Console.WriteLine("hexpos="+hexpos);
 
 				var hexString = string.Concat(
@@ -196,9 +266,6 @@ public class DataProcessor
 					new string(Encoding.ASCII.GetString(frame).Where(c => c >= 0x20 && c <= 0x7F).ToArray()));
 				var selectedSubstring = hexString.Substring(p1, p2 - p1);
 				var intFrameValue = ConvertFrameHexValueToInt(selectedSubstring, hexpos);
-
-				// Read the config, and get register position addresses 
-				var config = ReadConfig(); //deserializer.Deserialize<RootObject>(configFile);
 				
 				// Config logging and processing
 				foreach (var parameter in config.parameters)
@@ -223,18 +290,20 @@ public class DataProcessor
 							if (item.registers[0].Contains(hexpos))
 							{
 								Console.WriteLine(
-									$"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom}");
+									$"Title: \"{item.name}\", registers: {item.registers[0]}, value: {intFrameValue * item.scale}{item.uom} ({intFrameValue}{item.uom})");
 							}
 						}
 					}
 				}
-				// frameInfoArr.Append(frameInfoTemp);
 				processingIterations++;
 			}
+			Console.WriteLine("===FRAME END===");
+			requestIterations++;
+			frameInfoList.Add(frameInfoTemp);
 		}
 		
 
-		return frameInfoTemp; //CheckFrameInfoJson(frameInfoArr);
+		return frameInfoTemp; //MergeFrameInfos(frameInfoList);
 	}
 
 	public YamlRootObject ReadConfig()
