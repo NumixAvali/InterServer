@@ -5,31 +5,26 @@ namespace InterServer.Logic;
 
 public class DataProcessor
 {
-    private static ushort CalculateCrc16Modbus(byte[] data)
-    {
-    	ushort crc = 0xFFFF;
+	private static ushort CalculateModbusCRC(byte[] data)
+	{
+		ushort crc = 0xFFFF;
+		for (int pos = 0; pos < data.Length; pos++)
+		{
+			crc ^= (ushort)data[pos];
 
-    	foreach (byte b in data)
-    	{
-    		crc ^= b;
-
-    		for (int i = 0; i < 8; i++)
-    		{
-    			if ((crc & 0x0001) != 0)
-    			{
-    				crc >>= 1;
-    				crc ^= 0xA001;
-    			}
-    			else
-    			{
-    				crc >>= 1;
-    			}
-    		}
-    	}
-
-    	return crc;
-    }
-    
+			for (int i = 8; i != 0; i--)
+			{
+				if ((crc & 0x0001) != 0)
+				{
+					crc >>= 1;
+					crc ^= 0xA001;
+				}
+				else
+					crc >>= 1;
+			}
+		}
+		return crc;
+	}    
     private static byte[] ConcatArrays(params byte[][] arrays)
     {
     	int totalLength = arrays.Sum(array => array.Length);
@@ -84,17 +79,15 @@ public class DataProcessor
 	    return val;
     }
 
-	public byte[] ConstructFrame(int sequence = 1)
+	public byte[] ConstructFrameRequest(int sequence)
 	{
-		/*
-		// This should be done via proper configuration menu, not hardcoded.
-		// TODO: make a configuration menu for those
-		uint inverterSn = 2749279538;
-		int regStart1 = Convert.ToInt32("0x0003", 16);
-		int regEnd1 = Convert.ToInt32("0x0070", 16);
+		var config = ReadConfig();
 		
-		int pini = regStart1;
-		int pfin = regEnd1;
+		// TODO: make that value configurable from GUI
+		uint inverterSn = 2749279538;
+		int regStart = config.requests[sequence].start;
+		int regEnd = config.requests[sequence].end;
+		
 		// Data frame begin
 		byte[] start = { 0xA5 };
 		byte[] length = { 0x17, 0x00 }; 
@@ -102,46 +95,46 @@ public class DataProcessor
 		byte[] serial = { 0x00, 0x00 };
 
 		// Blank data field
-		byte[] dataField = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-		string posIni = Convert.ToString(pini, 16).PadLeft(4, '0');
-		string posFin = Convert.ToString(pfin - pini + 1, 16).PadLeft(4, '0');
-
+		byte[] dataField = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+		
+		string posIni = regStart.ToString("X2").PadLeft(4, '0');
+		string posFin = ((regEnd - regStart + 1) & 0xFF).ToString("X2").PadLeft(4, '0');
+		
+		// Calculate Business field
 		byte[] businessField = { 0x01, 0x03,
 			Convert.ToByte(posIni.Substring(0, 2), 16),
 			Convert.ToByte(posIni.Substring(2, 2), 16),
 			Convert.ToByte(posFin.Substring(0, 2), 16),
 			Convert.ToByte(posFin.Substring(2, 2), 16) };
-		
-		ushort crcValue = CalculateCrc16Modbus(businessField);
-		byte[] crc = { (byte)(crcValue & 0xFF), (byte)((crcValue >> 8) & 0xFF) };
 
-		byte[] checksum = { 0x00 }; // checksum F2
+		// Stupid workaround, because algorithm produces that value with 1 extra bit
+		businessField[5] -= Convert.ToByte(sequence);
+		
+		byte[] crc = BitConverter.GetBytes(CalculateModbusCRC(businessField)).ToArray();
+
+		byte[] checksum = { 0x00 };
 		byte[] endCode = { 0x15 };
 
 		byte[] inverterSn2 = BitConverter.GetBytes(inverterSn);
-		Array.Reverse(inverterSn2);
 
 		// Construct the frame
-		byte[] frame = ConcatArrays(start, length, controlCode, serial, inverterSn2, dataField, businessField, crc, checksum, endCode);
-		*/
+		byte[] frameRequest = ConcatArrays(start, length, controlCode, serial, inverterSn2, dataField, businessField, crc, checksum, endCode);
 		
-		
-		// Those are taken from the original python script
-		// Eventually they need to be calculated by ConstructFrame()
-		byte[] unbased1 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwADAG40Jp0V");
-		byte[] unbased2 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwCWAGPlz38V");
+		// Calculating and filling in the "checksum" byte
+		int frameChecksum = 0;
+		for (int i = 1; i < frameRequest.Length - 2; i++)
+		{
+			frameChecksum += frameRequest[i];
+		}
+		frameRequest[frameRequest.Length - 2] = (byte)(frameChecksum & 0xFF);
 
-		if (sequence == 0)
-		{
-			return unbased1;
-		}
-		else
-		{
-			return unbased2;
-		}
+		// Those are taken from the original python script
+		// And were used only for comparison in certain cases 
+		// byte[] unbased1 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwADAG40Jp0V");
+		// byte[] unbased2 = Convert.FromBase64String("pRcAEEUAADKt3qMCAAAAAAAAAAAAAAAAAAABAwCWAGPlz38V");
+		// string comparisonValue = Convert.ToBase64String(frameRequest);
 		
-		// return frame;
+		return frameRequest;
 	}
 
 	public FrameInfo DigestResponse(List<byte[]> frameList)

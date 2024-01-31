@@ -136,7 +136,7 @@ public class RequestHandler
 				while (responses < 2)
 				{
 					// Send data to the server
-					tcpClient.GetStream().Write(dataProcessor.ConstructFrame(responses), 0, dataProcessor.ConstructFrame(responses).Length);
+					tcpClient.GetStream().Write(dataProcessor.ConstructFrameRequest(responses), 0, dataProcessor.ConstructFrameRequest(responses).Length);
 
 					if (verbose) Console.WriteLine($"Message #{responses} was sent to the inverter");
 
@@ -173,7 +173,7 @@ public class RequestHandler
 			{
 				Console.WriteLine("[TCP Client] Error: " + ex.Message);
 				Console.WriteLine(ex);
-				if (ex.Message == "connection timeout or something")
+				if (ex.Message.Contains("connection"))
 				{
 					internalDataJson.Data = ex.Message;
 					internalDataJson.Status = ResponseType.ConnectionError;
