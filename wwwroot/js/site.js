@@ -20,8 +20,10 @@ let scrollToTopBtn = document.getElementById("scrollToTopBtn");
 // When the user scrolls down 200px from the top of the document, show the button
 window.onscroll = function () {
     if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        scrollToTopBtn.style.pointerEvents = "auto";
         scrollToTopBtn.style.opacity = "1";
     } else {
+        scrollToTopBtn.style.pointerEvents = "none";
         scrollToTopBtn.style.opacity = "0";
     }
 };
