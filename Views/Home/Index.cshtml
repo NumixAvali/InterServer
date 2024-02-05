@@ -3,11 +3,6 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-<style>
-    .preserve-newlines {
-        white-space: pre;
-    }
-</style>
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
@@ -17,12 +12,15 @@
 <div class="align-content-lg-start">
     <h5>Current system state:</h5>
     <p class="fst-italic">Here should be a graph with some cached data, taken from DB.</p>
-    <p class="preserve-newlines">
-        @{
-            var response =  new RequestHandler().ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData); //"Here should be a graph with some cached data, taken from DB.";
-            //JsonSerializer.Serialize(response)
-            @response.Data
+    <p id="currentData" class="lds-dual-ring">
+        @section scripts {
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
+            <script src="~/js/dataUpdater.js"></script>
+            <script>
+                refreshDataOnLoad()
+            </script>
         }
     </p>
+    <br/>
     <button class="btn-lg" onclick="refreshBtnClick()">Refresh</button>
 </div>
