@@ -8,14 +8,16 @@ public enum JsonRequestType : ushort
 
 public enum ResponseType : ushort
 {
-	IncorrectJson = 0,
+	Ok = 0,
 	AuthReject = 1,
 	ServiceUnavailable = 2,
-	UnknownError = 3,
-	Ok = 4,
+	IncorrectJson = 3,
+	UnknownError = 4,
 	Rejected = 5,
 	InternalError = 6,
-	ConnectionError = 7
+	ConnectionError = 7,
+	InverterConfigError = 8,
+	AppConfigError = 9
 }
 
 public enum ReplyDataType : ushort
@@ -37,6 +39,7 @@ public class ReplyJson
 {
 	public required ResponseType Status { get; set; }
 	public required string Message { get; set; }
+	public long Timestamp { get; set; }
 	public FrameInfo? Data { get; set; }
 }
 

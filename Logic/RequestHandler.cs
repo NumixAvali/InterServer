@@ -29,6 +29,7 @@ public class RequestHandler
 		{
 			Status = ResponseType.UnknownError,
 			Message = "Internal error!",
+			Timestamp = GetUnixTimestamp(DateTime.Now),
 			Data = null
 		};
 
@@ -212,6 +213,12 @@ public class RequestHandler
 			Data = otherSillyCat
 		};
 		return dataJson;
+	}
+
+	private long GetUnixTimestamp(DateTime timeframe)
+	{
+		DateTimeOffset dateTimeOffset = new DateTimeOffset(timeframe);
+		return dateTimeOffset.ToUnixTimeSeconds();
 	}
 	
 
