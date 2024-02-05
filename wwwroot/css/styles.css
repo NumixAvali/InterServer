@@ -46,3 +46,16 @@
         transform: rotate(360deg);
     }
 }
+
+/*Underline dotted thing*/
+
+.tableDecor {
+    border-collapse: collapse;
+    /*width: 100%;*/
+}
+
+.rowDecor {
+    border: 1px dotted #a0a0a0;
+    padding: 8px;
+    text-align: left;
+}
