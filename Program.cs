@@ -4,6 +4,14 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Thing to make JSON case-sensitive, unused for now. Breaks some things
+// builder.Services.AddControllers()
+// 	.AddJsonOptions(options =>
+// 	{
+// 		options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+// 		options.JsonSerializerOptions.PropertyNamingPolicy = null;             
+// 	});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

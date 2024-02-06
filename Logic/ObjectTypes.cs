@@ -17,22 +17,23 @@ public enum ResponseType : ushort
 	InternalError = 6,
 	ConnectionError = 7,
 	InverterConfigError = 8,
-	AppConfigError = 9
+	AppConfigError = 9,
+	InvalidTimestamp = 10
 }
 
 public enum ReplyDataType : ushort
 {
 	CurrentData = 0,
-	CachedData = 1,
-	NoData = 2
+	CachedLatestData = 1,
+	CachedPeriodData = 2,
+	NoData = 3
 }
 
 
 public class RequestJson
 {
-	public bool? ForceRefresh { get; set; }
-	public string? Token { get; set; }
-	public ResponseType RequestType { get; set; } 
+	public long Timestamp { get; set; }
+	public string Token { get; set; }
 }
 
 public class ReplyJson

@@ -22,15 +22,35 @@ public class ApiController : ControllerBase
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpGet, Route("get-cache")]
+	[HttpGet, Route("get-latest-cache")]
 	[DisableRateLimiting]
-	public ReplyJson GetCachedData()
+	public ReplyJson GetLatestCachedData()
 	{
 		// var reply = new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedData);
 		
-		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedData);
+		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedLatestData);
 	}
-	
+
+	[MapToApiVersion("1.0")]
+	[HttpPost, Route("get-cache")]
+	// [DisableRateLimiting]
+	// public ReplyJson GetCachedData()
+	public ActionResult<ReplyJson> GetCachedData([FromBody] RequestJson postData)
+	{
+		// var reply = new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedData);
+		
+		if (String.IsNullOrEmpty(postData.Token) ) return new RequestHandler().ResponseManager(ResponseType.AuthReject);
+		if (postData.Timestamp == 0) return new RequestHandler().ResponseManager(ResponseType.IncorrectJson);
+
+		DataJson additionalData = new DataJson
+		{
+			Status = ResponseType.Ok,
+			Data = postData.Timestamp.ToString()
+		};
+
+		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedPeriodData, additionalData);
+	}
+
 	[MapToApiVersion("1.0")]
 	[HttpGet, Route("get-data")]
 	public ReplyJson GetCurrentData()

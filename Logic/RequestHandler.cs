@@ -5,10 +5,12 @@ namespace InterServer.Logic;
 
 public class RequestHandler
 {
-	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData)
+	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData, DataJson additionalData = null)
 	{
-		const string sillyCat =
-			@"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+		DataJson preFinalJson = new DataJson()
+		{
+			Status = ResponseType.UnknownError,
+			Data = @"⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
 ⣿⡿⣸⣿⣿⣿⣷⣮⣭⣛⣿⣿⣿⣿⣶⣥⣾⣿⣿⣿⡷⣽⣿
 ⣿⡏⣾⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿
@@ -17,12 +19,7 @@ public class RequestHandler
 ⣿⡖⣽⣿⣿⣿⣿⣿⣿⣯⣭⣭⣿⣿⣷⣿⣿⣿⣿⣿⡔⣾⣿
 ⣿⡡⢟⡛⠻⠿⣿⣿⣿⣝⣨⣝⣡⣿⣿⡿⠿⠿⢟⣛⣫⣼⣿
 ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
-⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿";
-		
-		DataJson preFinalJson = new DataJson()
-		{
-			Status = ResponseType.UnknownError,
-			Data = sillyCat,
+⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿",
 		};
 		
 		var reply = new ReplyJson
@@ -42,12 +39,15 @@ public class RequestHandler
 			{ ResponseType.ServiceUnavailable, "Service temporary unavailable. Try again later." },
 			{ ResponseType.UnknownError, "Unknown server error. Try again later." },
 			{ ResponseType.Rejected, "Rejected." },
-			{ ResponseType.InternalError, "Internal Error."}
+			{ ResponseType.InternalError, "Internal Error."},
+			{ ResponseType.InvalidTimestamp, "Invalid Timestamp"},
+			{ ResponseType.ConnectionError, "Connection Error."}
 		};
 		
 		Dictionary<ReplyDataType, DataJson> responseDataType = new Dictionary<ReplyDataType, DataJson>
 		{
-			{ ReplyDataType.CachedData, GetCachedJson() },
+			{ ReplyDataType.CachedLatestData, GetRecentCachedJson() },
+			{ ReplyDataType.CachedPeriodData, GetHistoricCachedJson(UnixTimeStampToDateTime(Convert.ToInt32(additionalData.Data))) },
 			{ ReplyDataType.CurrentData, GetJson() },
 			{ ReplyDataType.NoData, preFinalJson },
 		};
@@ -62,13 +62,26 @@ public class RequestHandler
 			preFinalJson = dataMessage;
 		}
 
+		// Special handling cases. Yes, it's bad
 		switch (preFinalJson.Status)
 		{
 			case ResponseType.Ok:
 			{
 				reply.Status = ResponseType.Ok;
 				reply.Message = responseMessages[ResponseType.Ok];
-				reply.Data = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data) ;
+				try
+				{
+					reply.Data = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data) ;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("[Request Handler] JSON casting to data field error");
+					Console.WriteLine(e);
+					// throw;
+					reply.Status = ResponseType.InternalError;
+					reply.Message = responseMessages[ResponseType.InternalError];
+					reply.Data = null;
+				}
 				break;
 			}
 			case ResponseType.InternalError:
@@ -85,13 +98,22 @@ public class RequestHandler
 				reply.Data = null;
 				break;
 			}
-			default:
+			case ResponseType.InvalidTimestamp:
 			{
-				reply.Status = ResponseType.UnknownError;
-				reply.Message = responseMessages[ResponseType.UnknownError];
+				reply.Status = ResponseType.InvalidTimestamp;
+				reply.Message = responseMessages[ResponseType.InvalidTimestamp];
 				reply.Data = null;
 				break;
 			}
+			// This part is disabled, until I ran into a problem, which will force me to re-enable it back
+			// default:
+			// {
+			// 	Console.WriteLine($"UNIMPLEMENTED CALL {reply.Status} TRIGGERED THIS DEFAULT PART");
+			// 	reply.Status = ResponseType.UnknownError;
+			// 	reply.Message = responseMessages[ResponseType.UnknownError];
+			// 	reply.Data = null;
+			// 	break;
+			// }
 		}
 		
 		return reply;
@@ -192,9 +214,16 @@ public class RequestHandler
 		return internalDataJson;
 	}
 
-	private DataJson GetCachedJson()
+	private DataJson GetHistoricCachedJson(DateTime timePeriod)
 	{
-		string otherSillyCat =
+		long[] validTimestamps = { 621, 926, 69, 420 };
+
+		long stamp = GetUnixTimestamp(timePeriod);
+
+		DataJson dataJson = new DataJson
+		{
+			Status = ResponseType.Ok,
+			Data =
 @"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⡇⠀⠀⠘⠷⣀⠀⠀⠈⢻⢤⠶⠛⠉⢸⡇⠀⠀⠀⠀⠀⠀⠀
 ⠀⠸⡁⠀⢀⣠⣄⠀⠀⠀⡀⣀⠀⠀⠀⠀⡾⠁⠀⠀⠀⠀⠀⠀⠀
@@ -205,21 +234,60 @@ public class RequestHandler
 ⠀⠀⠀⠀⠠⢯⡀⠀⠀⠀⠀⠀⢼⠛⠀⠀⠀⠀⠀⠀⠀⢸⡦⠃⠘
 ⠀⠀⠀⠀⠀⢸⡇⠀⠘⣾⠇⠀⠸⣦⠀⠀⠀⠀⠀⠀⠀⣰⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀";
-
-		DataJson dataJson = new DataJson
-		{
-			Status = ResponseType.Ok,
-			Data = otherSillyCat
+⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀"
 		};
+
+		if (!validTimestamps.Contains(stamp))
+		{
+			dataJson.Status = ResponseType.InvalidTimestamp;
+			// dataJson.Data = null;
+			return dataJson;
+		}
+
+		// TODO: some DB requesting mechanism
+
+		FrameInfo frameInfo = new FrameInfo();
+		dataJson.Data = JsonSerializer.Serialize(frameInfo) ?? throw new InvalidOperationException();
 		return dataJson;
 	}
 
+	private DataJson GetRecentCachedJson()
+	{
+		DataJson dataJson = new DataJson
+		{
+			Status = ResponseType.Ok,
+			Data = 
+@"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⡇⠀⠀⠘⠷⣀⠀⠀⠈⢻⢤⠶⠛⠉⢸⡇⠀⠀⠀⠀⠀⠀⠀
+⠀⠸⡁⠀⢀⣠⣄⠀⠀⠀⡀⣀⠀⠀⠀⠀⡾⠁⠀⠀⠀⠀⠀⠀⠀
+⢀⡀⣇⢰⡟⢰⣿⠀⠀⣼⡇⠈⠳⡄⠀⣰⠃⠀⠀⠀⠀⠀⠀⠀⠀
+⠙⢧⡀⠸⠀⢘⣛⡀⠀⠻⠇⠀⣰⠃⢚⣳⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠸⠵⠢⣄⣀⠈⣠⡀⠀⠀⠀⢉⣠⣿⡁⠀⠀⠀⠀⠀⠀⠀⡀⠀
+⠀⠀⠀⠀⢲⣟⠛⠀⠀⠀⠉⠉⣿⠃⠀⠀⠀⠀⠀⠀⠀⢀⠀⡏⢳
+⠀⠀⠀⠀⠠⢯⡀⠀⠀⠀⠀⠀⢼⠛⠀⠀⠀⠀⠀⠀⠀⢸⡦⠃⠘
+⠀⠀⠀⠀⠀⢸⡇⠀⠘⣾⠇⠀⠸⣦⠀⠀⠀⠀⠀⠀⠀⣰⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀"
+		};
+		
+		// TODO: some DB requesting mechanism
+
+		FrameInfo frameInfo = new FrameInfo();
+		dataJson.Data = JsonSerializer.Serialize(frameInfo);
+		return dataJson;
+	}
 	private long GetUnixTimestamp(DateTime timeframe)
 	{
 		DateTimeOffset dateTimeOffset = new DateTimeOffset(timeframe);
 		return dateTimeOffset.ToUnixTimeSeconds();
 	}
 	
+	public static DateTime UnixTimeStampToDateTime( double unixTimeStamp )
+	{
+		// Unix timestamp is seconds past epoch
+		DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		dateTime = dateTime.AddSeconds( unixTimeStamp ).ToLocalTime();
+		return dateTime;
+	}
 
 }
