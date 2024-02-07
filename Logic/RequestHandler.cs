@@ -5,7 +5,7 @@ namespace InterServer.Logic;
 
 public class RequestHandler
 {
-	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData, DataJson additionalData = null)
+	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData, DataJson? additionalData = null)
 	{
 		DataJson preFinalJson = new DataJson()
 		{
@@ -44,24 +44,29 @@ public class RequestHandler
 			{ ResponseType.ConnectionError, "Connection Error."}
 		};
 		
-		Dictionary<ReplyDataType, DataJson> responseDataType = new Dictionary<ReplyDataType, DataJson>
+		switch (dataType)
 		{
-			{ ReplyDataType.CachedLatestData, GetRecentCachedJson() },
-			{ ReplyDataType.CachedPeriodData, GetHistoricCachedJson(UnixTimeStampToDateTime(Convert.ToInt32(additionalData.Data))) },
-			{ ReplyDataType.CurrentData, GetJson() },
-			{ ReplyDataType.NoData, preFinalJson },
-		};
+			case ReplyDataType.CachedLatestData:
+				preFinalJson = GetRecentCachedJson();
+				break;
+			case ReplyDataType.CachedPeriodData:
+				if (additionalData != null)
+				{
+					preFinalJson = GetHistoricCachedJson(UnixTimeStampToDateTime(Convert.ToInt32(additionalData.Data)));
+				}
+				break;
+			case ReplyDataType.CurrentData:
+				preFinalJson = GetJson();
+				break;
+			// default:
+			// 	throw new ArgumentException("Invalid reply data type.", nameof(dataType));
+		}
 		
 		if (responseMessages.TryGetValue(responseType, out var message))
 		{
 			reply.Message = message;
 		}
 		
-		if (responseDataType.TryGetValue(dataType, out var dataMessage))
-		{
-			preFinalJson = dataMessage;
-		}
-
 		// Special handling cases. Yes, it's bad
 		switch (preFinalJson.Status)
 		{
@@ -289,5 +294,4 @@ public class RequestHandler
 		dateTime = dateTime.AddSeconds( unixTimeStamp ).ToLocalTime();
 		return dateTime;
 	}
-
 }
