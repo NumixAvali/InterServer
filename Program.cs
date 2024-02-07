@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using InterServer.Logic;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -34,6 +35,10 @@ builder.Services.AddRateLimiter(_ => _
 		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
 		options.QueueLimit = 2;
 	}));
+
+// Background timed data collector
+builder.Services.AddSingleton<RequestCollector>();
+builder.Services.AddHostedService<RequestCollector>();
 
 var app = builder.Build();
 
