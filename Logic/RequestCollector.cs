@@ -7,7 +7,6 @@ public class RequestCollector : BackgroundService
     public RequestCollector(ILogger<RequestCollector> logger)
     {
         _logger = logger;
-
     }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
