@@ -19,13 +19,13 @@ public class RequestCollector : BackgroundService
             RequestHandler requestHandler = new RequestHandler();
 
             DbHandler dbHandler = new DbHandler(
-                "",
-                "",
-                "",
+                "192.168.2.116",
+                "Measurements",
+                "dbadmin",
                 ""
                 );
             
-            // dbHandler.UploadData(requestHandler.ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData));
+            dbHandler.UploadData(requestHandler.ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData));
 
             await Task.Delay(5000, stoppingToken);
         }
