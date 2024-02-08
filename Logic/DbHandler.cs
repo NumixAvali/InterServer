@@ -1,45 +1,56 @@
-namespace InterServer.Logic;
-using MySql.Data.MySqlClient;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbHandler
+namespace InterServer.Logic;
+
+public class DbHandler : DbContext
 {
-    private string Ip { get; set; }
-    private string DbName { get; set; }
-    private string Username { get; set; }
-    private string UserPassword { get; set; }
+    private readonly string _ip;
+    private readonly string _dbName;
+    private readonly string _username;
+    private readonly string _userPassword;
+
+    public DbSet<ReplyJsonEntity> MeasurementSet { get; set; }
 
     public DbHandler(string ip, string dbName, string username, string userPassword)
     {
-        Ip = ip;
-        DbName = dbName;
-        Username = username;
-        UserPassword = userPassword;
+        _ip = ip;
+        _dbName = dbName;
+        _username = username;
+        _userPassword = userPassword;
     }
 
-    public void UploadData()
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        string connectionString = $"Server={Ip};Database={DbName};Uid={Username};Pwd={UserPassword};";
-        
-        using var connection = new MySqlConnection(connectionString);
-        connection.Open();
+        string connectionString = $"Server={_ip};Database={_dbName};Uid={_username};Pwd={_userPassword};";
+        optionsBuilder.UseMySQL(connectionString);
+    }
 
-        try
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ReplyJsonEntity>(ConfigureReplyJsonEntity);
+    }
+
+    private void ConfigureReplyJsonEntity(EntityTypeBuilder<ReplyJsonEntity> builder)
+    {
+        // Configure entity properties
+        builder.Property(e => e.JsonData)
+            .IsRequired();
+    }
+    
+    public void UploadData(ReplyJson replyJson)
+    {
+        using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
-            string sql = "INSERT INTO Measurements (column1, column2, ...) VALUES (@value1, @value2, ...)";
-        
-            using var command = new MySqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@value1", "value1");
-            command.Parameters.AddWithValue("@value2", "value2");
-
-            command.ExecuteNonQuery();
+            var replyJsonEntity = new ReplyJsonEntity
+            {
+                JsonData = JsonSerializer.Serialize(replyJson)
+            };
+            context.MeasurementSet.Add(replyJsonEntity);
+            context.SaveChanges();
+            Console.WriteLine("[DB] Data pushed successfully.");
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-
-        connection.Close();
     }
 
     public FrameInfo[] GetData()

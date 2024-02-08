@@ -1,4 +1,6 @@
-﻿namespace InterServer.Logic;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace InterServer.Logic;
 
 public enum JsonRequestType : ushort
 {
@@ -34,6 +36,15 @@ public class RequestJson
 {
 	public long Timestamp { get; set; }
 	public string Token { get; set; }
+}
+
+public class ReplyJsonEntity
+{
+	[Key]
+	public int Id { get; set; }
+    
+	[Required]
+	public string JsonData { get; set; }
 }
 
 public class ReplyJson

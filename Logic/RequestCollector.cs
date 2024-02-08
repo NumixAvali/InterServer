@@ -16,6 +16,17 @@ public class RequestCollector : BackgroundService
             // TODO: Implement DB interaction
             // Console.WriteLine("Worker running at: {0}", DateTimeOffset.Now);
 
+            RequestHandler requestHandler = new RequestHandler();
+
+            DbHandler dbHandler = new DbHandler(
+                "",
+                "",
+                "",
+                ""
+                );
+            
+            // dbHandler.UploadData(requestHandler.ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData));
+
             await Task.Delay(5000, stoppingToken);
         }
     }
