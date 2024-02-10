@@ -27,7 +27,7 @@ public class RequestCollector : BackgroundService
             
             dbHandler.UploadData(requestHandler.ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData));
 
-            await Task.Delay(5000, stoppingToken);
+            await Task.Delay(1*60*1000, stoppingToken);
         }
     }
 

@@ -27,7 +27,7 @@ public class DbHandler : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         string connectionString = $"Server={_ip};Database={_dbName};Uid={_username};Pwd={_userPassword};";
-        optionsBuilder.UseMySQL(connectionString);
+        optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
