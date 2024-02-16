@@ -44,6 +44,12 @@ public class DbHandler : DbContext
     
     public void UploadData(ReplyJson replyJson)
     {
+        if (replyJson.Status != ResponseType.Ok || replyJson.Data == null)
+        {
+            Console.WriteLine("[DB] Received empty or errored 'replyJson' object, aborting upload.");
+            return;
+        }
+        
         using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
             var replyJsonEntity = new ReplyJsonEntity
@@ -56,8 +62,22 @@ public class DbHandler : DbContext
         }
     }
 
-    public FrameInfo[] GetData()
+    public List<FrameInfo> GetData()
     {
-        throw new NotImplementedException();
+        using (var context = new DbHandler())
+        {
+            // This line causes DB timeout exception for some reason.
+            // TODO: take a second look into this problem
+            var replyJsonEntities = context.MeasurementSet.ToList();
+
+            var frameInfos = replyJsonEntities.Select(entity =>
+            {
+                var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData);
+
+                return replyJson.Data;
+            }).ToList();
+
+            return frameInfos;
+        }
     }
 }

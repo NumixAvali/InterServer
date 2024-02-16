@@ -14,7 +14,12 @@ public class ApiController : ControllerBase
 	[HttpGet, Route("test")]
 	public IActionResult Test()
 	{
-		var data = new { message = "Hello, API!" };
+		var data = new DbHandler(
+			"192.168.2.116",
+			"Measurements",
+			"dbadmin",
+			""
+		).GetData();// { message = "Hello, API!" };
 
 		// var data = new RequestHandler().GetJson();
 
