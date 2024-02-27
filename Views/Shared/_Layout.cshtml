@@ -32,10 +32,62 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Documentation">Documentation</a>
                     </li>
                 </ul>
+                <button class="btn btn-light" id="settingsButton">Settings</button>
             </div>
         </div>
     </nav>
 </header>
+
+@* Settings Window *@
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @* Settings Content *@
+                @* Config selection field *@
+                <label for="configSelection" class="form-label">Inverter config file for data parsing</label>
+                <select class="form-select" id="configSelection" aria-label="Default select example">
+                    <option selected>Select inverter config...</option>
+                    <option value="1">Config One</option>
+                    <option value="2">Config Two</option>
+                    <option value="3">Config Three</option>
+                </select>
+                <br/>
+                @* Serial number field *@
+                <label for="serialNumberInput" class="form-label">Inverter serial number</label>
+                <input class="form-control" id="serialNumberInput" placeholder="1234567890">
+                <br/>
+                @* Data gathering worker settings *@
+                <label for="workerProcessSwitch" class="form-label">Timed data gathering service</label>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="workerProcessSwitch">
+                    <label class="form-check-label" for="workerProcessSwitch">Enable data gathering service</label>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">Seconds</a></li>
+                    <li><a class="dropdown-item" href="#">Minutes</a></li>
+                    <li><a class="dropdown-item" href="#">Hours</a></li>
+                    <li><a class="dropdown-item" href="#">Days</a></li>
+                  </ul>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard changes</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container">
     <main role="main" class="pb-3">
         @RenderBody()

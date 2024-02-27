@@ -19,3 +19,15 @@ scrollToTopBtn.addEventListener("click", function () {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 });
+
+$(document).ready(function () {
+    // Handling click event on Settings Button
+    $('#settingsButton').click(function () {
+        // Show the Settings Modal
+        $('#settingsModal').modal('show');
+    });
+    
+    $('.modal').on('click', '.close', function(){
+        $('#settingsModal').modal('hide');
+    });
+});
