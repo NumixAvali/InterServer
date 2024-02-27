@@ -40,8 +40,8 @@ function parseReplyToHtml(replyObj) {
 	for (const [key, value] of Object.entries(replyObj.data)) {
 		// console.log(key, value)
 		htmlOutput += '<tr>';
-		htmlOutput += `<td class="rowDecor">${value.title}</td>`;
-		htmlOutput += `<td class="rowDecor">${value.value * value.scale}${value.unit}</td>`;
+		htmlOutput += `<td>${value.title}</td>`;
+		htmlOutput += `<td>${value.value * value.scale}${value.unit}</td>`;
 		htmlOutput += '</tr>';
 	}	
 	
