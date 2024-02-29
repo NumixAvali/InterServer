@@ -42,7 +42,8 @@ public class ReplyJsonEntity
 {
 	[Key]
 	public int Id { get; set; }
-    
+	[Required]
+	public long Timestamp { get; set; }
 	[Required]
 	public string JsonData { get; set; }
 }

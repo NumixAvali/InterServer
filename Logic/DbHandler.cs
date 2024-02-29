@@ -54,6 +54,7 @@ public class DbHandler : DbContext
         {
             var replyJsonEntity = new ReplyJsonEntity
             {
+                Timestamp = replyJson.Timestamp,
                 JsonData = JsonSerializer.Serialize(replyJson)
             };
             context.MeasurementSet.Add(replyJsonEntity);
@@ -62,22 +63,29 @@ public class DbHandler : DbContext
         }
     }
 
-    public List<FrameInfo> GetData()
+    public List<ReplyJson> GetAllData()
     {
-        using (var context = new DbHandler())
+        List<ReplyJson> finalList = new List<ReplyJson>();
+        using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
-            // This line causes DB timeout exception for some reason.
-            // TODO: take a second look into this problem
             var replyJsonEntities = context.MeasurementSet.ToList();
-
-            var frameInfos = replyJsonEntities.Select(entity =>
+            
+            foreach (var entity in replyJsonEntities)
             {
-                var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData);
-
-                return replyJson.Data;
-            }).ToList();
-
-            return frameInfos;
+                try
+                {
+                    var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    finalList.Add(replyJson);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error converting JSON into object:\n" + entity.JsonData);
+                }
+            }
         }
+        return finalList;
     }
 }

@@ -19,7 +19,7 @@ public class ApiController : ControllerBase
 			"Measurements",
 			"dbadmin",
 			""
-		).GetData();// { message = "Hello, API!" };
+		).GetAllData();// { message = "Hello, API!" };
 
 		// var data = new RequestHandler().GetJson();
 
