@@ -13,9 +13,6 @@ public class DbHandler : DbContext
 
     public DbSet<ReplyJsonEntity> MeasurementSet { get; set; }
 
-    public DbHandler()
-    {
-    }
     public DbHandler(string ip, string dbName, string username, string userPassword)
     {
         _ip = ip;

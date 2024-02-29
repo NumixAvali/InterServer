@@ -27,7 +27,8 @@ public class RequestCollector : BackgroundService
             
             dbHandler.UploadData(requestHandler.ResponseManager(ResponseType.Ok,ReplyDataType.CurrentData));
 
-            await Task.Delay(1*60*1000, stoppingToken);
+            // TODO: finish making setting menu, so this horror can be avoided
+            await Task.Delay(10*60*1000, stoppingToken);
         }
     }
 
