@@ -1,0 +1,65 @@
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @* Settings Content *@
+                @* Config selection field *@
+                <label for="configSelection" class="form-label">Inverter config file for data parsing</label>
+                <select class="form-select" id="configSelection" aria-label="Default select example">
+                    <option selected>Select inverter config...</option>
+                    <option value="1">Config One</option>
+                    <option value="2">Config Two</option>
+                    <option value="3">Config Three</option>
+                </select>
+                <br/>
+                @* Serial number field *@
+                <label for="serialNumberInput" class="form-label">Inverter serial number</label>
+                <input class="form-control" id="serialNumberInput" placeholder="1234567890">
+                <br/>
+                @* DB settings *@
+                <label class="form-label">DB settings</label>
+                <div class="input-group mb-3">
+                    <label for="dbSettingsName" class="input-group-text">DB name</label>
+                    <input type="text" class="form-control" id="dbSettingsName" aria-label="DB name">
+                </div>
+                <div class="input-group mb-3">
+                    <label for="dbSettingsPass" class="input-group-text">DB password</label>
+                    <input type="text" class="form-control" id="dbSettingsPass" aria-label="DB password">
+                </div>
+                <div class="input-group mb-3">
+                    <label for="dbSettingsUser" class="input-group-text">DB username</label>
+                    <input type="text" class="form-control" id="dbSettingsUser" aria-label="DB username">
+                </div>
+                <div class="input-group mb-3">
+                    <label for="dbSettingsIp" class="input-group-text">DB IP</label>
+                    <input type="text" class="form-control" id="dbSettingsIp" aria-label="DB IP">
+                </div>
+                @* Data gathering worker settings *@
+                <label for="workerProcessSwitch" class="form-label">Timed data gathering service</label>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="workerProcessSwitch">
+                    <label class="form-check-label" for="workerProcessSwitch">Enable data gathering service</label>
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="inputGroupSelect01">Every</label>
+                    <input type="text" class="form-control" id="inputGroupSelect01" aria-label="Text input with dropdown button">
+                    <select class="form-select" id="inputGroupSelect02">
+                        <option selected>Choose...</option>
+                        <option value="1">Seconds</option>
+                        <option value="2">Minutes</option>
+                        <option value="3">Hours</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard changes</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
