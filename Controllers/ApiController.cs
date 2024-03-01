@@ -19,7 +19,9 @@ public class ApiController : ControllerBase
 			"Measurements",
 			"dbadmin",
 			""
-		).GetAllData();// { message = "Hello, API!" };
+			// ).GetDataByTimestamp(1709216936);
+			// ).GetLatestData();
+		).GetDataRange(1709216809, 1709216936);
 
 		// var data = new RequestHandler().GetJson();
 

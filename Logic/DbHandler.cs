@@ -65,24 +65,114 @@ public class DbHandler : DbContext
         List<ReplyJson> finalList = new List<ReplyJson>();
         using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
-            var replyJsonEntities = context.MeasurementSet.ToList();
-            
-            foreach (var entity in replyJsonEntities)
+            try
             {
-                try
+                var replyJsonEntities = context.MeasurementSet.ToList();
+            
+                foreach (var entity in replyJsonEntities)
                 {
-                    var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData, new JsonSerializerOptions
+                    try
                     {
-                        PropertyNameCaseInsensitive = true
-                    });
-                    finalList.Add(replyJson);
+                        var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        finalList.Add(replyJson);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("[DB] Error converting JSON into object:\n" + entity.JsonData);
+                    }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error converting JSON into object:\n" + entity.JsonData);
-                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[DB] Error getting all DB data.\n"+e);
+                return null;
             }
         }
         return finalList;
     }
+
+    public ReplyJson GetDataByTimestamp(long timestamp)
+    {
+        using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
+        {
+            try
+            {
+                var entry = context.MeasurementSet
+                    .Single(m => m.Timestamp == timestamp);
+            
+                return JsonSerializer.Deserialize<ReplyJson>(entry.JsonData, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                })!;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[DB] Requested timestamp DB entry is unavailable.");
+                return null;
+            }
+        }
+    }
+    
+    public List<ReplyJson> GetDataRange(double timestampStart, double timestampEnd)
+    {
+        List<ReplyJson> finalList = new List<ReplyJson>();
+        using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
+        {
+            try
+            {
+                var replyJsonEntities = context.MeasurementSet
+                    .Where(m => m.Timestamp >= timestampStart && m.Timestamp <= timestampEnd)
+                    .ToList();
+            
+                foreach (var entity in replyJsonEntities)
+                {
+                    try
+                    {
+                        var replyJson = JsonSerializer.Deserialize<ReplyJson>(entity.JsonData, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        finalList.Add(replyJson);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("[DB] Error converting JSON into object:\n" + entity.JsonData);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[DB] Error getting all DB data.\n"+e);
+                return null;
+            }
+        }
+        return finalList;
+    }
+    
+    public ReplyJson GetLatestData()
+    {
+        using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
+        {
+            try
+            {
+                var entry = context.MeasurementSet
+                    .OrderBy(m => m.Id)
+                    .LastOrDefault();
+        
+                return JsonSerializer.Deserialize<ReplyJson>(entry.JsonData, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                })!;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[DB] Error getting latest DB entry\n"+e);
+                return null;
+            }
+        }
+    }
+
 }
