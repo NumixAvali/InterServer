@@ -24,7 +24,16 @@
                 <label class="form-label">DB settings</label>
                 <div class="input-group mb-3">
                     <label for="dbSettingsName" class="input-group-text">DB name</label>
-                    <input type="text" class="form-control" id="dbSettingsName" aria-label="DB name">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="dbSettingsName"
+                        aria-label="DB name"
+                        placeholder="Measurements"
+                        value="@_dbSettingsNameInput"
+                        @oninput="OnInputEvent"
+                    >
+                    <button @onclick="SaveSettings">save 2</button>
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsPass" class="input-group-text">DB password</label>
@@ -58,8 +67,25 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard changes</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveSettings">Save changes</button>
             </div>
         </div>
     </div>
 </div>
+
+@code
+{
+    // private string test = "test!";
+    private string _dbSettingsNameInput = "Hello, world";
+    private void OnInputEvent(ChangeEventArgs changeEvent)
+    {
+        _dbSettingsNameInput = (string)changeEvent.Value;
+        Console.WriteLine($"Value entered: {_dbSettingsNameInput}");
+    }
+
+    private void SaveSettings()
+    {
+        // Console.WriteLine("test: "+test);
+        Console.WriteLine($"DB name: {_dbSettingsNameInput}");
+    }
+}

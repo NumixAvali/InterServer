@@ -14,11 +14,13 @@ public class ApiController : ControllerBase
 	[HttpGet, Route("test")]
 	public IActionResult Test()
 	{
+		AppSettings appSettings = new SettingsController().GetSettings();
+		
 		var data = new DbHandler(
-			"192.168.2.116",
-			"Measurements",
-			"dbadmin",
-			""
+			appSettings.DbIp,
+			appSettings.DbName,
+			appSettings.DbUsername,
+			appSettings.DbPassword
 			// ).GetDataByTimestamp(1709216936);
 			// ).GetLatestData();
 		).GetDataRange(1709216809, 1709216936);
