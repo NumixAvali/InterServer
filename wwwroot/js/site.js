@@ -27,6 +27,38 @@ $(document).ready(function () {
         $('#settingsModal').modal('show');
     });
     
+    $('#saveSettingsButton').click(function() {
+        
+        let settings= {
+            ConfigName: $('#configSelection').val(),
+            SerialNumber: $('#serialNumberInput').val(),
+            DbName: $('#dbSettingsName').val(),
+            DbPassword: $('#dbSettingsPass').val(),
+            DbUsername: $('#dbSettingsUser').val(),
+            DbIp: $('#dbSettingsIp').val(),
+            EnableAutomaticDataGather: $('#workerProcessSwitch').val(),
+            AutomaticGatherInterval: $('#gatherIntervalValue').val(),
+            AutomaticGatherIntervalModifier: $('#gatherIntervalModifier').val(),
+        }
+        // console.log(settings)
+        
+        // TODO: finish making endpoint for that, or come up with other way to do it without endpoint.
+        $.ajax({
+            url: pageUrl,
+            type: 'POST',
+            data: JSON.stringify(settings),
+            contentType: 'application/json',
+            success: function(response) {
+                // Handle success response
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                alert("Error updating settings. Check console for more info.")
+                console.error(error);
+            }
+        });
+    });
+    
     $('.modal').on('click', '.close', function(){
         $('#settingsModal').modal('hide');
     });

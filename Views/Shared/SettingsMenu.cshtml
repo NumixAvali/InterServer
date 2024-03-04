@@ -30,10 +30,7 @@
                         id="dbSettingsName"
                         aria-label="DB name"
                         placeholder="Measurements"
-                        value="@_dbSettingsNameInput"
-                        @oninput="OnInputEvent"
                     >
-                    <button @onclick="SaveSettings">save 2</button>
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsPass" class="input-group-text">DB password</label>
@@ -54,9 +51,9 @@
                     <label class="form-check-label" for="workerProcessSwitch">Enable data gathering service</label>
                 </div>
                 <div class="input-group mb-3">
-                    <label class="input-group-text" for="inputGroupSelect01">Every</label>
-                    <input type="text" class="form-control" id="inputGroupSelect01" aria-label="Text input with dropdown button">
-                    <select class="form-select" id="inputGroupSelect02">
+                    <label class="input-group-text" for="gatherIntervalValue">Every</label>
+                    <input type="text" class="form-control" id="gatherIntervalValue" aria-label="Text input with dropdown button">
+                    <select class="form-select" id="gatherIntervalModifier">
                         <option selected>Choose...</option>
                         <option value="1">Seconds</option>
                         <option value="2">Minutes</option>
@@ -67,25 +64,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard changes</button>
-                <button type="button" class="btn btn-primary" @onclick="SaveSettings">Save changes</button>
+                <button type="button" class="btn btn-primary" id="saveSettingsButton">Save changes</button>
             </div>
         </div>
     </div>
 </div>
-
-@code
-{
-    // private string test = "test!";
-    private string _dbSettingsNameInput = "Hello, world";
-    private void OnInputEvent(ChangeEventArgs changeEvent)
-    {
-        _dbSettingsNameInput = (string)changeEvent.Value;
-        Console.WriteLine($"Value entered: {_dbSettingsNameInput}");
-    }
-
-    private void SaveSettings()
-    {
-        // Console.WriteLine("test: "+test);
-        Console.WriteLine($"DB name: {_dbSettingsNameInput}");
-    }
-}
