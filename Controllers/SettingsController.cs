@@ -30,16 +30,22 @@ public class SettingsController
     
     public void SaveSettings(AppSettings appSettings)
     {
-        string jsonSettings = JsonSerializer.Serialize(appSettings);
+        string jsonSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
 
-        try
+        if (File.Exists("./settings.json"))
         {
-            File.Move("./settings.json","./settings.json.bak");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("[Settings] Error backing up settings file:\n"+e);
-            throw;
+            try
+            {
+                File.Move("./settings.json","./settings.json.bak");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[Settings] Error backing up settings file:\n"+e);
+                // throw;
+            }
         }
 
         try

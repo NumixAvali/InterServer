@@ -1,4 +1,5 @@
 using System.Text;
+using InterServer.Controllers;
 using YamlDotNet.Serialization;
 
 namespace InterServer.Logic;
@@ -81,10 +82,10 @@ public class DataProcessor
 
 	public byte[] ConstructFrameRequest(int sequence)
 	{
-		var config = ReadConfig();
+		var config = ReadInverterConfig();
 		
 		// TODO: make that value configurable from GUI
-		uint inverterSn = 2749279538;
+		int inverterSn = new SettingsController().GetSettings().SerialNumber;
 		int regStart = config.requests[sequence].start;
 		int regEnd = config.requests[sequence].end;
 		
@@ -196,7 +197,7 @@ public class DataProcessor
 		
 		
 		// Read the config, and get register position addresses 
-		var config = ReadConfig(); //deserializer.Deserialize<RootObject>(configFile);
+		var config = ReadInverterConfig(); //deserializer.Deserialize<RootObject>(configFile);
 		
 		// Those are taken from the config file, no touchy
 		byte[] pini = {0x0003};
@@ -287,10 +288,10 @@ public class DataProcessor
 		return frameInfoTemp; //MergeFrameInfos(frameInfoList);
 	}
 
-	public YamlRootObject ReadConfig()
+	public YamlRootObject ReadInverterConfig()
 	{
-		// TODO: make a GUI config file selector
-		string configFile = File.ReadAllText("InverterConfigs/deye_hybrid.yaml");
+		string inverterConfigName = new SettingsController().GetSettings().ConfigName;
+		string configFile = File.ReadAllText($"InverterConfigs/{inverterConfigName}");
 				
 		var deserializer = new DeserializerBuilder().Build();
 		var config = deserializer.Deserialize<YamlRootObject>(configFile);
