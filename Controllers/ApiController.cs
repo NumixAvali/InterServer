@@ -35,7 +35,15 @@ public class ApiController : ControllerBase
 	[DisableRateLimiting]
 	public ReplyJson GetLatestCachedData()
 	{
-		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedLatestData);
+		AppSettings settings = new SettingsController().GetSettings();
+		ReplyJson dbEntry = new DbHandler(
+			settings.DbIp,
+			settings.DbName,
+			settings.DbUsername,
+			settings.DbPassword
+		).GetLatestData();
+
+		return dbEntry;
 	}
 
 	[MapToApiVersion("1.0")]

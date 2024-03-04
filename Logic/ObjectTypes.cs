@@ -20,7 +20,9 @@ public enum ResponseType : ushort
 	ConnectionError = 7,
 	InverterConfigError = 8,
 	AppConfigError = 9,
-	InvalidTimestamp = 10
+	InvalidTimestamp = 10,
+	NoDataAvailableYet = 11,
+	NotEnoughData = 12,
 }
 
 public enum ReplyDataType : ushort
@@ -34,7 +36,7 @@ public enum ReplyDataType : ushort
 public class AppSettings
 {
 	public string ConfigName { get; set; }
-	public int SerialNumber { get; set; }
+	public uint SerialNumber { get; set; }
 	public string DbName { get; set; }
 	public string DbPassword { get; set; }
 	public string DbUsername { get; set; }
@@ -66,6 +68,14 @@ public class ReplyJson
 	public required string Message { get; set; }
 	public long Timestamp { get; set; }
 	public FrameInfo? Data { get; set; }
+}
+
+public class ReplyJsonList
+{
+	public required ResponseType Status { get; set; }
+	public required string Message { get; set; }
+	public long Timestamp { get; set; }
+	public List<ReplyJson>? Data { get; set; }
 }
 
 public class DataJson

@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text.Json;
+using InterServer.Controllers;
 
 namespace InterServer.Logic;
 
@@ -41,7 +42,9 @@ public class RequestHandler
 			{ ResponseType.Rejected, "Rejected." },
 			{ ResponseType.InternalError, "Internal Error."},
 			{ ResponseType.InvalidTimestamp, "Invalid Timestamp"},
-			{ ResponseType.ConnectionError, "Connection Error."}
+			{ ResponseType.ConnectionError, "Connection Error."},
+			{ ResponseType.NoDataAvailableYet, "No data available yet, try again later."},
+			{ ResponseType.NotEnoughData, "Not enough stored data to fulfil request."}
 		};
 		
 		switch (dataType)
@@ -57,6 +60,26 @@ public class RequestHandler
 				break;
 			case ReplyDataType.CurrentData:
 				preFinalJson = GetJson();
+				// This hack is a very simple and sporadic value validator.
+				// Because sometimes for unknown reason reply might consist of a bunch of empty values,
+				// which ruin the whole point of the project.
+				FrameInfo tempCheck = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+				while 
+				(
+					tempCheck.BatteryStatus.Value == 0 &&
+					tempCheck.BatteryCurrent.Value == 0 &&
+					tempCheck.SmartLoadEnableStatus.Value == 0 &&
+					tempCheck.LoadVoltage.Value == 0 &&
+					tempCheck.GridConnectedStatus.Value == 0 &&
+					tempCheck.UsageTime.Value == 0 &&
+					tempCheck.BatterySoc.Value == 0
+				)
+				{
+					Console.WriteLine("[Error correction] Invalid data frame received, requesting next one.");
+					preFinalJson = GetJson();
+					tempCheck = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+				}
+
 				break;
 			// default:
 			// 	throw new ArgumentException("Invalid reply data type.", nameof(dataType));
@@ -67,13 +90,14 @@ public class RequestHandler
 			reply.Message = message;
 		}
 		
-		// Special handling cases. Yes, it's bad
+		// TODO: Make an argument for DataJson object, where data gets passed as is, without any checks and alterations.  
+		
 		switch (preFinalJson.Status)
 		{
 			case ResponseType.Ok:
 			{
-				reply.Status = ResponseType.Ok;
-				reply.Message = responseMessages[ResponseType.Ok];
+				reply.Status = preFinalJson.Status;
+				reply.Message = responseMessages[preFinalJson.Status];
 				try
 				{
 					reply.Data = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data) ;
@@ -83,30 +107,20 @@ public class RequestHandler
 					Console.WriteLine("[Request Handler] JSON casting to data field error");
 					Console.WriteLine(e);
 					// throw;
-					reply.Status = ResponseType.InternalError;
-					reply.Message = responseMessages[ResponseType.InternalError];
+					reply.Status = preFinalJson.Status;
+					reply.Message = responseMessages[preFinalJson.Status];
 					reply.Data = null;
 				}
 				break;
 			}
 			case ResponseType.InternalError:
-			{
-				reply.Status = ResponseType.InternalError;
-				reply.Message = responseMessages[ResponseType.InternalError];
-				reply.Data = null;
-				break;
-			}
 			case ResponseType.ConnectionError:
-			{
-				reply.Status = ResponseType.ConnectionError;
-				reply.Message = responseMessages[ResponseType.ConnectionError];
-				reply.Data = null;
-				break;
-			}
 			case ResponseType.InvalidTimestamp:
+			case ResponseType.NoDataAvailableYet:
+			case ResponseType.NotEnoughData:
 			{
-				reply.Status = ResponseType.InvalidTimestamp;
-				reply.Message = responseMessages[ResponseType.InvalidTimestamp];
+				reply.Status = preFinalJson.Status;
+				reply.Message = responseMessages[preFinalJson.Status];
 				reply.Data = null;
 				break;
 			}
@@ -148,6 +162,7 @@ public class RequestHandler
 			Data = sillyCat
 		};
 		
+		// TODO: add these fields to the settings menu
 		const string inverterIp = "192.168.2.211";
 		const int inverterPort = 8899;
 		
@@ -192,7 +207,6 @@ public class RequestHandler
 					Console.WriteLine("Data processor error:\n"+e);
 					// throw;
 				}
-
 
 				internalDataJson.Data = JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
 				internalDataJson.Status = ResponseType.Ok;
@@ -258,27 +272,24 @@ public class RequestHandler
 
 	private DataJson GetRecentCachedJson()
 	{
+		// This class isn't suitable for DB data processing.
+		// Everything that's being received in this class gets mutilated.
+		// TODO: look into this again, and potentially clean-up this method.
+		AppSettings settings = new SettingsController().GetSettings();
+		ReplyJson dbEntry = new DbHandler(
+			settings.DbIp,
+			settings.DbName,
+			settings.DbUsername,
+			settings.DbPassword
+		).GetLatestData();
+		
+		// This doesn't work with current implementation of handling replies.
 		DataJson dataJson = new DataJson
 		{
-			Status = ResponseType.Ok,
-			Data = 
-@"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡇⠀⠀⠘⠷⣀⠀⠀⠈⢻⢤⠶⠛⠉⢸⡇⠀⠀⠀⠀⠀⠀⠀
-⠀⠸⡁⠀⢀⣠⣄⠀⠀⠀⡀⣀⠀⠀⠀⠀⡾⠁⠀⠀⠀⠀⠀⠀⠀
-⢀⡀⣇⢰⡟⢰⣿⠀⠀⣼⡇⠈⠳⡄⠀⣰⠃⠀⠀⠀⠀⠀⠀⠀⠀
-⠙⢧⡀⠸⠀⢘⣛⡀⠀⠻⠇⠀⣰⠃⢚⣳⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠸⠵⠢⣄⣀⠈⣠⡀⠀⠀⠀⢉⣠⣿⡁⠀⠀⠀⠀⠀⠀⠀⡀⠀
-⠀⠀⠀⠀⢲⣟⠛⠀⠀⠀⠉⠉⣿⠃⠀⠀⠀⠀⠀⠀⠀⢀⠀⡏⢳
-⠀⠀⠀⠀⠠⢯⡀⠀⠀⠀⠀⠀⢼⠛⠀⠀⠀⠀⠀⠀⠀⢸⡦⠃⠘
-⠀⠀⠀⠀⠀⢸⡇⠀⠘⣾⠇⠀⠸⣦⠀⠀⠀⠀⠀⠀⠀⣰⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀"
+			Status = dbEntry.Data != null ? ResponseType.Ok : ResponseType.NoDataAvailableYet,
+			Data = JsonSerializer.Serialize(dbEntry.Data)
 		};
 		
-		// TODO: some DB requesting mechanism
-
-		FrameInfo frameInfo = new FrameInfo();
-		dataJson.Data = JsonSerializer.Serialize(frameInfo);
 		return dataJson;
 	}
 	private long GetUnixTimestamp(DateTime timeframe)

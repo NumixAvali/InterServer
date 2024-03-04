@@ -85,7 +85,7 @@ public class DataProcessor
 		var config = ReadInverterConfig();
 		
 		// TODO: make that value configurable from GUI
-		int inverterSn = new SettingsController().GetSettings().SerialNumber;
+		uint inverterSn = new SettingsController().GetSettings().SerialNumber;
 		int regStart = config.requests[sequence].start;
 		int regEnd = config.requests[sequence].end;
 		
