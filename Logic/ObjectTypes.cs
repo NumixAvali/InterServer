@@ -31,6 +31,18 @@ public enum ReplyDataType : ushort
 	NoData = 3
 }
 
+public class AppSettings
+{
+	public string ConfigName { get; set; }
+	public int SerialNumber { get; set; }
+	public string DbName { get; set; }
+	public string DbPassword { get; set; }
+	public string DbUsername { get; set; }
+	public string DbIp { get; set; }
+	public bool EnableAutomaticDataGather { get; set; }
+	public float AutomaticGatherInterval { get; set; }
+	public int AutomaticGatherIntervalModifier { get; set; }
+}
 
 public class RequestJson
 {
