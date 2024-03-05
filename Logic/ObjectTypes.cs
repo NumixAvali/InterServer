@@ -69,6 +69,13 @@ public class ReplyJson
 	public long Timestamp { get; set; }
 	public FrameInfo? Data { get; set; }
 }
+public class ReplyJsonNested
+{
+	public required ResponseType Status { get; set; }
+	public required string Message { get; set; }
+	public long Timestamp { get; set; }
+	public ReplyJson? Data { get; set; }
+}
 
 public class ReplyJsonList
 {
@@ -81,7 +88,8 @@ public class ReplyJsonList
 public class DataJson
 {
 	public required ResponseType Status { get; set; }
-	public required string Data { get; set; }
+	public Type DataType { get; set; }
+	public required dynamic Data { get; set; }
 }
 
 public class InnerFrameInfo

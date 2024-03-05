@@ -9,6 +9,7 @@ function getData() {
 			url: "/api/v1/get-data",
 			async: false,
 			success: function (reply) {
+				// console.log(reply)
 				data.push(reply.data.loadVoltage.value * reply.data.loadVoltage.scale);
 			},
 			error: function (error) {
@@ -22,7 +23,8 @@ function getData() {
 			url: "/api/v1/get-latest-cache",
 			async: false,
 			success: function (reply) {
-				data.push(reply.data.loadVoltage.value * reply.data.loadVoltage.scale);
+				// console.log(reply)
+				data.push(reply.data.data.loadVoltage.value * reply.data.data.loadVoltage.scale);
 			},
 			error: function (error) {
 				console.error(`Refresh data (2) error!\n`, error);

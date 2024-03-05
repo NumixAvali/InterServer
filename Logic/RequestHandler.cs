@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using InterServer.Controllers;
 
@@ -6,7 +7,7 @@ namespace InterServer.Logic;
 
 public class RequestHandler
 {
-	public ReplyJson ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData, DataJson? additionalData = null)
+	public dynamic ResponseManager(ResponseType responseType, ReplyDataType dataType = ReplyDataType.NoData, DataJson? additionalData = null)
 	{
 		DataJson preFinalJson = new DataJson()
 		{
@@ -23,7 +24,21 @@ public class RequestHandler
 ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿",
 		};
 		
-		var reply = new ReplyJson
+		var replyJsonRegular = new ReplyJson
+		{
+			Status = ResponseType.UnknownError,
+			Message = "Internal error!",
+			Timestamp = GetUnixTimestamp(DateTime.Now),
+			Data = null
+		};
+		var replyJsonNested = new ReplyJsonNested
+		{
+			Status = ResponseType.UnknownError,
+			Message = "Internal error!",
+			Timestamp = GetUnixTimestamp(DateTime.Now),
+			Data = null
+		};
+		var replyJsonList = new ReplyJsonList
 		{
 			Status = ResponseType.UnknownError,
 			Message = "Internal error!",
@@ -55,7 +70,7 @@ public class RequestHandler
 			case ReplyDataType.CachedPeriodData:
 				if (additionalData != null)
 				{
-					preFinalJson = GetHistoricCachedJson(UnixTimeStampToDateTime(Convert.ToInt32(additionalData.Data)));
+					preFinalJson = GetHistoricCachedJson(Convert.ToUInt32(additionalData.Data));
 				}
 				break;
 			case ReplyDataType.CurrentData:
@@ -63,7 +78,7 @@ public class RequestHandler
 				// This hack is a very simple and sporadic value validator.
 				// Because sometimes for unknown reason reply might consist of a bunch of empty values,
 				// which ruin the whole point of the project.
-				FrameInfo tempCheck = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+				FrameInfo tempCheck = preFinalJson.Data; //JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
 				while 
 				(
 					tempCheck.BatteryStatus.Value == 0 &&
@@ -77,7 +92,7 @@ public class RequestHandler
 				{
 					Console.WriteLine("[Error correction] Invalid data frame received, requesting next one.");
 					preFinalJson = GetJson();
-					tempCheck = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+					tempCheck = preFinalJson.Data; //JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
 				}
 
 				break;
@@ -87,7 +102,9 @@ public class RequestHandler
 		
 		if (responseMessages.TryGetValue(responseType, out var message))
 		{
-			reply.Message = message;
+			replyJsonRegular.Message = message;
+			replyJsonNested.Message = message;
+			replyJsonList.Message = message;
 		}
 		
 		// TODO: Make an argument for DataJson object, where data gets passed as is, without any checks and alterations.  
@@ -96,21 +113,31 @@ public class RequestHandler
 		{
 			case ResponseType.Ok:
 			{
-				reply.Status = preFinalJson.Status;
-				reply.Message = responseMessages[preFinalJson.Status];
-				try
+				// Maybe there's a better way of doing that...
+				if (preFinalJson.DataType == typeof(FrameInfo))
 				{
-					reply.Data = JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data) ;
+					replyJsonRegular.Status = preFinalJson.Status;
+					replyJsonRegular.Message = responseMessages[preFinalJson.Status];
+					replyJsonRegular.Data = preFinalJson.Data;
 				}
-				catch (Exception e)
+				else if (preFinalJson.DataType == typeof(ReplyJsonNested))
 				{
-					Console.WriteLine("[Request Handler] JSON casting to data field error");
-					Console.WriteLine(e);
-					// throw;
-					reply.Status = preFinalJson.Status;
-					reply.Message = responseMessages[preFinalJson.Status];
-					reply.Data = null;
+					replyJsonNested.Status = preFinalJson.Status;
+					replyJsonNested.Message = responseMessages[preFinalJson.Status];
+					replyJsonNested.Data = preFinalJson.Data;
 				}
+				else if (preFinalJson.DataType == typeof(ReplyJsonList))
+				{
+					replyJsonList.Status = preFinalJson.Status;
+					replyJsonList.Message = responseMessages[preFinalJson.Status];
+					replyJsonList.Data = preFinalJson.Data;
+				}
+				else
+				{
+					// Default case
+					Console.WriteLine("Unknown dataJson datatype reached!");
+				}
+				
 				break;
 			}
 			case ResponseType.InternalError:
@@ -119,9 +146,9 @@ public class RequestHandler
 			case ResponseType.NoDataAvailableYet:
 			case ResponseType.NotEnoughData:
 			{
-				reply.Status = preFinalJson.Status;
-				reply.Message = responseMessages[preFinalJson.Status];
-				reply.Data = null;
+				replyJsonRegular.Status = preFinalJson.Status;
+				replyJsonRegular.Message = responseMessages[preFinalJson.Status];
+				replyJsonRegular.Data = null;
 				break;
 			}
 			// This part is disabled, until I ran into a problem, which will force me to re-enable it back
@@ -135,7 +162,20 @@ public class RequestHandler
 			// }
 		}
 		
-		return reply;
+		if (preFinalJson.DataType == typeof(FrameInfo))
+		{
+			return replyJsonRegular;
+		}
+		else if (preFinalJson.DataType == typeof(ReplyJsonNested))
+		{
+			return replyJsonNested;
+		}
+		else if (preFinalJson.DataType == typeof(ReplyJsonList))
+		{
+			return replyJsonList;
+		}
+
+		return null;
 	}
 	
 
@@ -208,8 +248,9 @@ public class RequestHandler
 					// throw;
 				}
 
-				internalDataJson.Data = JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
+				internalDataJson.Data = digestedInfo; //JsonSerializer.Serialize(digestedInfo) ?? sillyCat; // BitConverter.ToString(buffer).Replace("-", " ");
 				internalDataJson.Status = ResponseType.Ok;
+				internalDataJson.DataType = typeof(FrameInfo);
 			}
 			catch (Exception ex)
 			{
@@ -233,12 +274,10 @@ public class RequestHandler
 		return internalDataJson;
 	}
 
-	private DataJson GetHistoricCachedJson(DateTime timePeriod)
+	private DataJson GetHistoricCachedJson(uint timestamp)
 	{
-		long[] validTimestamps = { 621, 926, 69, 420 };
-
-		long stamp = GetUnixTimestamp(timePeriod);
-
+		uint[] validTimestamps = { 621, 926, 69, 420 };
+		
 		DataJson dataJson = new DataJson
 		{
 			Status = ResponseType.Ok,
@@ -256,7 +295,7 @@ public class RequestHandler
 ⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀"
 		};
 
-		if (!validTimestamps.Contains(stamp))
+		if (!validTimestamps.Contains(timestamp))
 		{
 			dataJson.Status = ResponseType.InvalidTimestamp;
 			// dataJson.Data = null;
@@ -272,9 +311,6 @@ public class RequestHandler
 
 	private DataJson GetRecentCachedJson()
 	{
-		// This class isn't suitable for DB data processing.
-		// Everything that's being received in this class gets mutilated.
-		// TODO: look into this again, and potentially clean-up this method.
 		AppSettings settings = new SettingsController().GetSettings();
 		ReplyJson dbEntry = new DbHandler(
 			settings.DbIp,
@@ -283,11 +319,11 @@ public class RequestHandler
 			settings.DbPassword
 		).GetLatestData();
 		
-		// This doesn't work with current implementation of handling replies.
 		DataJson dataJson = new DataJson
 		{
 			Status = dbEntry.Data != null ? ResponseType.Ok : ResponseType.NoDataAvailableYet,
-			Data = JsonSerializer.Serialize(dbEntry.Data)
+			DataType = typeof(ReplyJsonNested),
+			Data = dbEntry //JsonSerializer.Serialize(dbEntry)
 		};
 		
 		return dataJson;

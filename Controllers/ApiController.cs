@@ -21,9 +21,9 @@ public class ApiController : ControllerBase
 			appSettings.DbName,
 			appSettings.DbUsername,
 			appSettings.DbPassword
-			// ).GetDataByTimestamp(1709216936);
+			).GetDataByTimestamp(1709216936);
 			// ).GetLatestData();
-		).GetDataRange(1709216809, 1709216936);
+		// ).GetDataRange(1709216809, 1709216936);
 
 		// var data = new RequestHandler().GetJson();
 
@@ -33,17 +33,18 @@ public class ApiController : ControllerBase
 	[MapToApiVersion("1.0")]
 	[HttpGet, Route("get-latest-cache")]
 	[DisableRateLimiting]
-	public ReplyJson GetLatestCachedData()
+	public ReplyJsonNested GetLatestCachedData()
 	{
-		AppSettings settings = new SettingsController().GetSettings();
-		ReplyJson dbEntry = new DbHandler(
-			settings.DbIp,
-			settings.DbName,
-			settings.DbUsername,
-			settings.DbPassword
-		).GetLatestData();
+		
+		try
+		{
+			return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedLatestData);
+		}
+		catch
+		{
+			return new RequestHandler().ResponseManager(ResponseType.UnknownError, ReplyDataType.NoData);
+		}
 
-		return dbEntry;
 	}
 
 	[MapToApiVersion("1.0")]
