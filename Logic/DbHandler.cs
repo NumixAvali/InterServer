@@ -94,8 +94,14 @@ public class DbHandler : DbContext
         return finalList;
     }
 
-    public ReplyJson GetDataByTimestamp(long timestamp)
+    public DataJson GetDataByTimestamp(long timestamp)
     {
+        DataJson dataJson = new DataJson
+        {
+            // DataType = typeof(ReplyJsonNested),
+            Status = ResponseType.UnknownError,
+            Data = null
+        };
         using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
             try
@@ -103,15 +109,21 @@ public class DbHandler : DbContext
                 var entry = context.MeasurementSet
                     .Single(m => m.Timestamp == timestamp);
             
-                return JsonSerializer.Deserialize<ReplyJson>(entry.JsonData, new JsonSerializerOptions
+                var dbEntry = JsonSerializer.Deserialize<ReplyJson>(entry.JsonData, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 })!;
+
+                dataJson.Status = ResponseType.Ok;
+                dataJson.Data = dbEntry;
+                return dataJson;
             }
             catch (Exception e)
             {
-                Console.WriteLine("[DB] Requested timestamp DB entry is unavailable.");
-                return null;
+                Console.WriteLine("[DB] Requested timestamp DB entry is unavailable.\n"+e);
+                dataJson.Status = ResponseType.InvalidTimestamp;
+                dataJson.Data = null;
+                return dataJson;
             }
         }
     }

@@ -51,7 +51,7 @@ public class ApiController : ControllerBase
 	[HttpPost, Route("get-cache")]
 	// [DisableRateLimiting]
 	// public ReplyJson GetCachedData()
-	public ActionResult<ReplyJson> GetCachedData([FromBody] RequestJson postData)
+	public ActionResult<ReplyJsonNested> GetCachedData([FromBody] RequestJson postData)
 	{
 		if (String.IsNullOrEmpty(postData.Token) ) return new RequestHandler().ResponseManager(ResponseType.AuthReject);
 		if (postData.Timestamp == 0) return new RequestHandler().ResponseManager(ResponseType.IncorrectJson);

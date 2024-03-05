@@ -146,9 +146,25 @@ public class RequestHandler
 			case ResponseType.NoDataAvailableYet:
 			case ResponseType.NotEnoughData:
 			{
-				replyJsonRegular.Status = preFinalJson.Status;
-				replyJsonRegular.Message = responseMessages[preFinalJson.Status];
-				replyJsonRegular.Data = null;
+				if (preFinalJson.DataType == typeof(FrameInfo))
+				{
+					replyJsonRegular.Status = preFinalJson.Status;
+					replyJsonRegular.Message = responseMessages[preFinalJson.Status];
+					replyJsonRegular.Data = null;
+				}
+				else if (preFinalJson.DataType == typeof(ReplyJsonNested))
+				{
+					replyJsonNested.Status = preFinalJson.Status;
+					replyJsonNested.Message = responseMessages[preFinalJson.Status];
+					replyJsonNested.Data = null;
+				}
+				else if (preFinalJson.DataType == typeof(ReplyJsonList))
+				{
+					replyJsonList.Status = preFinalJson.Status;
+					replyJsonList.Message = responseMessages[preFinalJson.Status];
+					replyJsonList.Data = null;
+				}
+				
 				break;
 			}
 			// This part is disabled, until I ran into a problem, which will force me to re-enable it back
@@ -276,36 +292,21 @@ public class RequestHandler
 
 	private DataJson GetHistoricCachedJson(uint timestamp)
 	{
-		uint[] validTimestamps = { 621, 926, 69, 420 };
+		AppSettings settings = new SettingsController().GetSettings();
+		DataJson dbEntry = new DbHandler(
+			settings.DbIp,
+			settings.DbName,
+			settings.DbUsername,
+			settings.DbPassword
+		).GetDataByTimestamp(timestamp);
 		
 		DataJson dataJson = new DataJson
 		{
-			Status = ResponseType.Ok,
-			Data =
-@"⠀⠀⣼⠲⢤⡀⣀⣐⣷⢤⡀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⡇⠀⠀⠘⠷⣀⠀⠀⠈⢻⢤⠶⠛⠉⢸⡇⠀⠀⠀⠀⠀⠀⠀
-⠀⠸⡁⠀⢀⣠⣄⠀⠀⠀⡀⣀⠀⠀⠀⠀⡾⠁⠀⠀⠀⠀⠀⠀⠀
-⢀⡀⣇⢰⡟⢰⣿⠀⠀⣼⡇⠈⠳⡄⠀⣰⠃⠀⠀⠀⠀⠀⠀⠀⠀
-⠙⢧⡀⠸⠀⢘⣛⡀⠀⠻⠇⠀⣰⠃⢚⣳⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠸⠵⠢⣄⣀⠈⣠⡀⠀⠀⠀⢉⣠⣿⡁⠀⠀⠀⠀⠀⠀⠀⡀⠀
-⠀⠀⠀⠀⢲⣟⠛⠀⠀⠀⠉⠉⣿⠃⠀⠀⠀⠀⠀⠀⠀⢀⠀⡏⢳
-⠀⠀⠀⠀⠠⢯⡀⠀⠀⠀⠀⠀⢼⠛⠀⠀⠀⠀⠀⠀⠀⢸⡦⠃⠘
-⠀⠀⠀⠀⠀⢸⡇⠀⠘⣾⠇⠀⠸⣦⠀⠀⠀⠀⠀⠀⠀⣰⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣶⠀⠀⢻⡆⠀⢸⡇⠉⠲⣄⠀⣀⡀⡶⠃⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀⠀⢸⡇⠀⠀⢹⡏⠁⠀⠀⠀⠀⠀⠀"
+			Status = dbEntry.Status,
+			DataType = typeof(ReplyJsonNested),
+			Data = dbEntry.Data //JsonSerializer.Serialize(dbEntry)
 		};
 
-		if (!validTimestamps.Contains(timestamp))
-		{
-			dataJson.Status = ResponseType.InvalidTimestamp;
-			// dataJson.Data = null;
-			return dataJson;
-		}
-
-		// TODO: some DB requesting mechanism
-
-		FrameInfo frameInfo = new FrameInfo();
-		dataJson.Data = JsonSerializer.Serialize(frameInfo) ?? throw new InvalidOperationException();
 		return dataJson;
 	}
 
