@@ -5,19 +5,24 @@ function getData() {
 	
 	try {
 		$.ajax({
-			type: "GET",
-			url: "/api/v1/get-data",
+			type: "POST",
+			url: "/api/v1/get-cache",
 			async: false,
-			success: function (reply) {
-				// console.log(reply)
-				data.push(reply.data.loadVoltage.value * reply.data.loadVoltage.scale);
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			data: JSON.stringify({
+				timestamp: 1709216936,
+				token: "a"
+			}),
+			success: function(response) {
+				console.log(response);
+				data.push(response.data.data.loadVoltage.value * response.data.data.loadVoltage.scale)
 			},
-			error: function (error) {
-				console.error(`Refresh data (1) error!\n`, error);
+			error: function(error) {
+				console.error("Error retrieving cache:", error);
 				// Handle error appropriately
 			}
 		});
-		
 		$.ajax({
 			type: "GET",
 			url: "/api/v1/get-latest-cache",
@@ -28,6 +33,19 @@ function getData() {
 			},
 			error: function (error) {
 				console.error(`Refresh data (2) error!\n`, error);
+				// Handle error appropriately
+			}
+		});
+		$.ajax({
+			type: "GET",
+			url: "/api/v1/get-data",
+			async: false,
+			success: function (reply) {
+				// console.log(reply)
+				data.push(reply.data.loadVoltage.value * reply.data.loadVoltage.scale);
+			},
+			error: function (error) {
+				console.error(`Refresh data (1) error!\n`, error);
 				// Handle error appropriately
 			}
 		});
@@ -44,7 +62,7 @@ console.log(getData())
 
 // Define your data
 var data = {
-	labels: ['Past', 'Present'],
+	labels: ['Historic','Past', 'Present'],
 	datasets: [{
 		label: 'Battery level %',
 		data: getData(),
