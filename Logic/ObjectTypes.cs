@@ -30,7 +30,10 @@ public enum ReplyDataType : ushort
 	CurrentData = 0,
 	CachedLatestData = 1,
 	CachedPeriodData = 2,
-	NoData = 3
+	CachedRangeData = 3,
+	NoData = 4,
+	AllData = 5,
+	Timestamps = 6,
 }
 
 public class AppSettings
@@ -52,6 +55,14 @@ public class RequestJson
 	public string Token { get; set; }
 }
 
+public class RequestJsonRange
+{
+	public uint TimestampStart { get; set; }
+	public uint TimestampEnd { get; set; }
+	public string Token { get; set; }
+}
+
+
 public class ReplyJsonEntity
 {
 	[Key]
@@ -69,6 +80,7 @@ public class ReplyJson
 	public long Timestamp { get; set; }
 	public FrameInfo? Data { get; set; }
 }
+
 public class ReplyJsonNested
 {
 	public required ResponseType Status { get; set; }
@@ -78,6 +90,14 @@ public class ReplyJsonNested
 }
 
 public class ReplyJsonList
+{
+	public required ResponseType Status { get; set; }
+	public required string Message { get; set; }
+	public long Timestamp { get; set; }
+	public List<ReplyJson>? Data { get; set; }
+}
+
+public class ReplyJsonTimestamps
 {
 	public required ResponseType Status { get; set; }
 	public required string Message { get; set; }

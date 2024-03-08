@@ -96,6 +96,18 @@ public class RequestHandler
 				}
 
 				break;
+			case ReplyDataType.CachedRangeData:
+				if (additionalData != null)
+				{
+					preFinalJson = GetHistoricCachedJsonRange(additionalData.Data[0], additionalData.Data[1]);
+				}
+				break;
+			case ReplyDataType.AllData:
+				preFinalJson = GetAllDbEntries();
+				break;
+			case ReplyDataType.Timestamps:
+				throw new NotImplementedException();
+				break;
 			// default:
 			// 	throw new ArgumentException("Invalid reply data type.", nameof(dataType));
 		}
@@ -145,6 +157,7 @@ public class RequestHandler
 			case ResponseType.InvalidTimestamp:
 			case ResponseType.NoDataAvailableYet:
 			case ResponseType.NotEnoughData:
+			case ResponseType.UnknownError:
 			{
 				if (preFinalJson.DataType == typeof(FrameInfo))
 				{
@@ -293,7 +306,7 @@ public class RequestHandler
 	private DataJson GetHistoricCachedJson(uint timestamp)
 	{
 		AppSettings settings = new SettingsController().GetSettings();
-		DataJson dbEntry = new DbHandler(
+		ReplyJson dbEntry = new DbHandler(
 			settings.DbIp,
 			settings.DbName,
 			settings.DbUsername,
@@ -302,9 +315,9 @@ public class RequestHandler
 		
 		DataJson dataJson = new DataJson
 		{
-			Status = dbEntry.Status,
+			Status = dbEntry != null ? ResponseType.Ok : ResponseType.InvalidTimestamp,
 			DataType = typeof(ReplyJsonNested),
-			Data = dbEntry.Data //JsonSerializer.Serialize(dbEntry)
+			Data = dbEntry //JsonSerializer.Serialize(dbEntry)
 		};
 
 		return dataJson;
@@ -327,6 +340,34 @@ public class RequestHandler
 			Data = dbEntry //JsonSerializer.Serialize(dbEntry)
 		};
 		
+		return dataJson;
+	}
+
+	private DataJson GetHistoricCachedJsonRange(uint timestampStart, uint timestampEnd)
+	{
+		List<ReplyJson> dbEntries = new DbHandler().GetDataRange(timestampStart, timestampEnd);
+		
+		DataJson dataJson = new DataJson
+		{
+			Status = dbEntries?.Any() == true ? ResponseType.Ok : ResponseType.NotEnoughData,
+			DataType = typeof(ReplyJsonList),
+			Data = dbEntries
+		};
+
+		return dataJson;
+	}
+
+	private DataJson GetAllDbEntries()
+	{
+		List<ReplyJson> dbEntries = new DbHandler().GetAllData();
+		
+		DataJson dataJson = new DataJson
+		{
+			Status = dbEntries?.Any() == true ? ResponseType.Ok : ResponseType.NotEnoughData,
+			DataType = typeof(ReplyJsonList),
+			Data = dbEntries
+		};
+
 		return dataJson;
 	}
 	private long GetUnixTimestamp(DateTime timeframe)
