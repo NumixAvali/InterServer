@@ -21,17 +21,17 @@ public class ApiController : ControllerBase
 			appSettings.DbName,
 			appSettings.DbUsername,
 			appSettings.DbPassword
-			).GetDataByTimestamp(1709216936);
+			// ).GetDataByTimestamp(1709216936);
 			// ).GetLatestData();
-		// ).GetDataRange(1709216809, 1709216936);
+		).GetDataRange(1709216809, 1709216936);
 
 		// var data = new RequestHandler().GetJson();
 
-		return Ok(data);
+		return Ok(data.Data);
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpGet, Route("get-latest-cache")]
+	[HttpGet, Route("latest-cache")]
 	[DisableRateLimiting]
 	public ReplyJsonNested GetLatestCachedData()
 	{
@@ -48,7 +48,7 @@ public class ApiController : ControllerBase
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpPost, Route("get-cache")]
+	[HttpPost, Route("historic-cache")]
 	// [DisableRateLimiting]
 	// public ReplyJson GetCachedData()
 	public ActionResult<ReplyJsonNested> GetCachedData([FromBody] RequestJson postData)
@@ -66,7 +66,7 @@ public class ApiController : ControllerBase
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpGet, Route("get-data")]
+	[HttpGet, Route("current-data")]
 	public ReplyJson GetCurrentData()
 	{
 		try
@@ -79,5 +79,26 @@ public class ApiController : ControllerBase
 		}
 		
 	}
+	
+	[MapToApiVersion("1.0")]
+	[HttpPost, Route("historic-cache-range")]
+	// [DisableRateLimiting]
+	public ActionResult<ReplyJsonList> GetCachedDataRange([FromBody] RequestJsonRange postData)
+	{
+		if (String.IsNullOrEmpty(postData.Token) ) return new RequestHandler().ResponseManager(ResponseType.AuthReject);
+		if (postData.TimestampStart == 0) return new RequestHandler().ResponseManager(ResponseType.IncorrectJson);
+		if (postData.TimestampEnd == 0) return new RequestHandler().ResponseManager(ResponseType.IncorrectJson);
+
+		uint[] timestampArray = new[] { postData.TimestampStart, postData.TimestampEnd };
+		
+		DataJson additionalData = new DataJson
+		{
+			Status = ResponseType.Ok,
+			Data = timestampArray
+		};
+
+		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedRangeData, additionalData);
+	}
+
 }
 

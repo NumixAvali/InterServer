@@ -6,7 +6,7 @@ function getData() {
 	try {
 		$.ajax({
 			type: "POST",
-			url: "/api/v1/get-cache",
+			url: "/api/v1/historic-cache",
 			async: false,
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",
@@ -25,7 +25,7 @@ function getData() {
 		});
 		$.ajax({
 			type: "GET",
-			url: "/api/v1/get-latest-cache",
+			url: "/api/v1/latest-cache",
 			async: false,
 			success: function (reply) {
 				// console.log(reply)
@@ -38,7 +38,7 @@ function getData() {
 		});
 		$.ajax({
 			type: "GET",
-			url: "/api/v1/get-data",
+			url: "/api/v1/current-data",
 			async: false,
 			success: function (reply) {
 				// console.log(reply)

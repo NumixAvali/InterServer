@@ -3,7 +3,7 @@ function refreshBtnClick() {
 		.html("")
 	$.ajax({
 		type: "GET",
-		url: "/api/v1/get-data",
+		url: "/api/v1/current-data",
 		success: function (reply) {
 			// console.log(reply)
 			$('#currentData').html(parseReplyToHtml(reply))
@@ -20,7 +20,7 @@ function refreshBtnClick() {
 function refreshDataOnLoad() {
 	$.ajax({
 		type: "GET",
-		url: "/api/v1/get-data",
+		url: "/api/v1/current-data",
 		success: function (reply) {
 			$('#currentData').html(parseReplyToHtml(reply))
 				.removeClass(`lds-dual-ring`)
