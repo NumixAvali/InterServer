@@ -1,4 +1,5 @@
 using System.Text.Json;
+using InterServer.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,13 +13,24 @@ public class DbHandler : DbContext
     private readonly string _userPassword;
 
     public DbSet<ReplyJsonEntity> MeasurementSet { get; set; }
-
+    
+    // For cases, where DB credentials need to be overriden 
     public DbHandler(string ip, string dbName, string username, string userPassword)
     {
         _ip = ip;
         _dbName = dbName;
         _username = username;
         _userPassword = userPassword;
+    }
+
+    public DbHandler()
+    {
+        AppSettings settings = new SettingsController().GetSettings();
+        
+        _ip = settings.DbIp;
+        _dbName = settings.DbName;
+        _username = settings.DbUsername;
+        _userPassword = settings.DbPassword;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -94,36 +106,26 @@ public class DbHandler : DbContext
         return finalList;
     }
 
-    public DataJson GetDataByTimestamp(long timestamp)
+    public ReplyJson GetDataByTimestamp(long timestamp)
     {
-        DataJson dataJson = new DataJson
-        {
-            // DataType = typeof(ReplyJsonNested),
-            Status = ResponseType.UnknownError,
-            Data = null
-        };
         using (var context = new DbHandler(_ip, _dbName, _username, _userPassword))
         {
             try
             {
                 var entry = context.MeasurementSet
                     .Single(m => m.Timestamp == timestamp);
-            
+
                 var dbEntry = JsonSerializer.Deserialize<ReplyJson>(entry.JsonData, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 })!;
 
-                dataJson.Status = ResponseType.Ok;
-                dataJson.Data = dbEntry;
-                return dataJson;
+                return dbEntry;
             }
             catch (Exception e)
             {
-                Console.WriteLine("[DB] Requested timestamp DB entry is unavailable.\n"+e);
-                dataJson.Status = ResponseType.InvalidTimestamp;
-                dataJson.Data = null;
-                return dataJson;
+                Console.WriteLine("[DB] Requested timestamp DB entry is unavailable.\n" + e);
+                return null;
             }
         }
     }
@@ -157,10 +159,11 @@ public class DbHandler : DbContext
             }
             catch (Exception e)
             {
-                Console.WriteLine("[DB] Error getting all DB data.\n"+e);
+                Console.WriteLine("[DB] Error getting DB data range.\n"+e);
                 return null;
             }
         }
+
         return finalList;
     }
     
