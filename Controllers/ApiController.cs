@@ -15,7 +15,7 @@ public class ApiController : ControllerBase
 	public IActionResult Test()
 	{
 		AppSettings appSettings = new SettingsController().GetSettings();
-		
+
 		var data = new DbHandler(
 			appSettings.DbIp,
 			appSettings.DbName,
@@ -23,15 +23,17 @@ public class ApiController : ControllerBase
 			appSettings.DbPassword
 			// ).GetDataByTimestamp(1709216936);
 			// ).GetLatestData();
-		).GetDataRange(1709216809, 1709216936);
+			// ).GetDataRange(1709216809, 1709216936);
+		).GetAllData();
 
 		// var data = new RequestHandler().GetJson();
 
-		return Ok(data.Data);
+		// return Ok(data.Data);
+		return Ok(data);
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpGet, Route("latest-cache")]
+	[HttpGet, Route("cache/latest")]
 	[DisableRateLimiting]
 	public ReplyJsonNested GetLatestCachedData()
 	{
@@ -48,9 +50,8 @@ public class ApiController : ControllerBase
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpPost, Route("historic-cache")]
+	[HttpPost, Route("cache/timestamp")]
 	// [DisableRateLimiting]
-	// public ReplyJson GetCachedData()
 	public ActionResult<ReplyJsonNested> GetCachedData([FromBody] RequestJson postData)
 	{
 		if (String.IsNullOrEmpty(postData.Token) ) return new RequestHandler().ResponseManager(ResponseType.AuthReject);
@@ -66,7 +67,7 @@ public class ApiController : ControllerBase
 	}
 
 	[MapToApiVersion("1.0")]
-	[HttpGet, Route("current-data")]
+	[HttpGet, Route("data/current")]
 	public ReplyJson GetCurrentData()
 	{
 		try
@@ -81,7 +82,7 @@ public class ApiController : ControllerBase
 	}
 	
 	[MapToApiVersion("1.0")]
-	[HttpPost, Route("historic-cache-range")]
+	[HttpPost, Route("cache/timestamp-range")]
 	// [DisableRateLimiting]
 	public ActionResult<ReplyJsonList> GetCachedDataRange([FromBody] RequestJsonRange postData)
 	{
@@ -98,6 +99,16 @@ public class ApiController : ControllerBase
 		};
 
 		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.CachedRangeData, additionalData);
+	}
+
+	[MapToApiVersion("1.0")]
+	[HttpPost, Route("cache/all")]
+	// [DisableRateLimiting]
+	public ActionResult<ReplyJsonList> GetAll([FromBody] RequestJson postData)
+	{
+		if (String.IsNullOrEmpty(postData.Token) ) return new RequestHandler().ResponseManager(ResponseType.AuthReject);
+		
+		return new RequestHandler().ResponseManager(ResponseType.Ok, ReplyDataType.AllData);
 	}
 
 }
