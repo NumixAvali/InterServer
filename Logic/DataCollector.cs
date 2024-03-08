@@ -2,17 +2,21 @@ using InterServer.Controllers;
 
 namespace InterServer.Logic;
 
-public class RequestCollector : BackgroundService
+public class DataCollector : BackgroundService
 {
-    private readonly ILogger<RequestCollector> _logger;
+    private readonly ILogger<DataCollector> _logger;
 
-    public RequestCollector(ILogger<RequestCollector> logger)
+    public DataCollector(ILogger<DataCollector> logger)
     {
         _logger = logger;
     }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        AppSettings settings = new SettingsController().GetSettings();
+
+        if (!settings.EnableAutomaticDataGather) return;
+            
         while (!stoppingToken.IsCancellationRequested)
         {
             // TODO: Implement DB interaction

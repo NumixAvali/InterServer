@@ -30,15 +30,15 @@ builder.Services.AddApiVersioning(opt =>
 builder.Services.AddRateLimiter(_ => _
 	.AddFixedWindowLimiter(policyName: "fixed", options =>
 	{
-		options.PermitLimit = 4;
+		options.PermitLimit = 10;
 		options.Window = TimeSpan.FromSeconds(12);
 		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-		options.QueueLimit = 2;
+		options.QueueLimit = 5;
 	}));
 
 // Background timed data collector
-builder.Services.AddSingleton<RequestCollector>();
-builder.Services.AddHostedService<RequestCollector>();
+builder.Services.AddSingleton<DataCollector>();
+builder.Services.AddHostedService<DataCollector>();
 
 var app = builder.Build();
 
