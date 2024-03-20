@@ -12,6 +12,13 @@
     </head>
 </head>
 <body>
+    @{
+        string baseUrl = "/"+Convert.ToString(Context.Request.Path).Split('/')[1];
+    }
+<script>
+    let baseUrl = "@baseUrl";
+</script>
+
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">

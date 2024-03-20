@@ -14,7 +14,6 @@ function timeConverter(unixTimestamp, useYear = false, useMonth = false){
 	let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 	return time;
 }
-
 function getData() {
 	let data = {
 		batterySoc: {
@@ -73,7 +72,7 @@ function getData() {
 	try {
 		$.ajax({
 			type: "POST",
-			url: "/api/v1/cache/timestamp-range",
+			url: `${baseUrl}/api/v1/cache/timestamp-range`,
 			async: false,
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",

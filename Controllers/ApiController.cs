@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace InterServer.Controllers;
 
 [ApiController]
-[Route("api/v{version:apiVersion}")] // Add "/[controller]" in case of transition to routed endpoints (https://medium.com/@dipendupaul/api-versioning-in-net-7-6db4fa9d2d99)
+[Route( "api/v{version:apiVersion}")]
+// This is gross, and shouldn't be hardcoded, but I give up. I don't have enough time to do it right.
+[Route( "interserver/api/v{version:apiVersion}")]
 [ApiVersion("1.0")]
 [EnableRateLimiting("fixed")]
 public class ApiController : ControllerBase
