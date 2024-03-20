@@ -47,6 +47,10 @@ public class AppSettings
 	public bool EnableAutomaticDataGather { get; set; }
 	public float AutomaticGatherInterval { get; set; }
 	public int AutomaticGatherIntervalModifier { get; set; }
+	public string PathPrefix { get; set; }
+	public string InverterIp { get; set; }
+	public int InverterPort { get; set; }
+	public bool DebugLogging { get; set; }
 }
 
 public class RequestJson

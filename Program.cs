@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using InterServer.Controllers;
 using InterServer.Logic;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
@@ -53,13 +54,26 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+string pathPrefix = "";
+try
+{
+	AppSettings settings = new SettingsController().GetSettings();
+	pathPrefix = settings.PathPrefix;
+}
+catch (Exception e)
+{
+	Console.WriteLine("[Boot] Settings don't exist.");
+	// throw;
+}
+app.UsePathBase("/"+pathPrefix+"/wwwroot");
+
 app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapControllerRoute(
 	name: "default",
-	pattern: "{prefix?}/{controller=Home}/{action=Index}/{id?}");
+	pattern: String.IsNullOrEmpty(pathPrefix)? "{controller=Home}/{action=Index}/{id?}" : "{prefix?}/{controller=Home}/{action=Index}/{id?}");
 
 app.UseRateLimiter();
 

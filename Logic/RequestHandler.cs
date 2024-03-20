@@ -119,8 +119,6 @@ public class RequestHandler
 			replyJsonList.Message = message;
 		}
 		
-		// TODO: Make an argument for DataJson object, where data gets passed as is, without any checks and alterations.  
-		
 		switch (preFinalJson.Status)
 		{
 			case ResponseType.Ok:
@@ -231,9 +229,8 @@ public class RequestHandler
 			Data = sillyCat
 		};
 		
-		// TODO: add these fields to the settings menu
-		const string inverterIp = "192.168.2.211";
-		const int inverterPort = 8899;
+		string inverterIp = new SettingsController().GetSettings().InverterIp;
+		int inverterPort = new SettingsController().GetSettings().InverterPort;
 		
 		//TCP client
 		using (TcpClient tcpClient = new TcpClient())
