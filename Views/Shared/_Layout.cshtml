@@ -13,10 +13,32 @@
 </head>
 <body>
     @{
-        string baseUrl = "/"+Convert.ToString(Context.Request.Path).Split('/')[1];
+        string baseUrl;
+
+        try
+        {
+            baseUrl = "/"+Convert.ToString(Context.Request.Path).Split('/')[1];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            // throw;
+            baseUrl = "";
+        }
     }
 <script>
-    let baseUrl = "@baseUrl";
+    let baseUrl = window.location.pathname; // Get the current path dynamically
+
+    // If the path ends with a controller/action, remove it
+    let controllerActionRegex = /\/\w+\/?\w*$/;
+    if (controllerActionRegex.test(baseUrl)) {
+        baseUrl = baseUrl.replace(controllerActionRegex, '');
+	}
+
+    baseUrl = (baseUrl === `/`) ? "@baseUrl" : baseUrl;
+	if ("@baseUrl" === `/`) baseUrl = ``;
+	// console.log("baseUrl:",baseUrl)
+	// console.log("baseUrlASP:","@baseUrl")
 </script>
 
 <header>
