@@ -14,6 +14,37 @@ function timeConverter(unixTimestamp, useYear = false, useMonth = false){
 	let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 	return time;
 }
+
+const radioButtons = document.querySelectorAll('.btn-check');
+let timePeriodStr = `Week`;
+
+radioButtons.forEach(button => {
+	button.addEventListener('change', function() {
+		if (this.checked) {
+			const selectedValue = this.nextElementSibling.textContent.trim();
+			// Perform action based on the selected radio button value
+			console.log(`Selected value: ${selectedValue}`);
+			timePeriodStr = selectedValue;
+			// Example: You can trigger functions or update content based on the selected value
+			// For demonstration purpose, let's log the selected value to the console
+		}
+	});
+});
+
+function strTimeToInt(string) {
+	// day - 86400
+	// week - 604800
+	// month - 2592000
+	// year - 31536000
+	
+	switch (string.toLowerCase()) {
+		case `day`: return 86400;
+		case `week`: return 604800;
+		case `month`: return 2592000;
+		case `year`: return 31536000;
+	}
+}
+
 function getData() {
 	let data = {
 		batterySoc: {
@@ -77,8 +108,8 @@ function getData() {
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",
 			data: JSON.stringify({
-				timestampStart: 1709216936,
-				timestampEnd: 1709319936,
+				timestampStart: (Date.now() /1000 |0)-strTimeToInt(timePeriodStr),
+				timestampEnd: Date.now() /1000 |0, // Gets current timestamp
 				token: "a"
 			}),
 			success: function (response) {
