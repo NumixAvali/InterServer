@@ -7,13 +7,15 @@ Main goal of this project is providing easy, user-friendly, human-readable and m
 Secondary goal of this project is to provide API for controlling and monitoring system.
 
 Currently implemented features:
-- [ ] Getting information from the hardware
-  - [ ] Getting cached information
+- [x] Hardware part
+  - [x] Getting cached information
   - [x] Getting current information
-- [ ] Web UI
-  - [ ] Graphs
+- [ ] Web part
+  - [x] Graphs
   - [ ] Settings
+  - [ ] Documentation
   - [ ] Auth
+  - [x] API
 
 ## Building project
 
@@ -22,5 +24,6 @@ Currently implemented features:
 - Open terminal, or PowerShell window in directory with project
 and run `dotnet build`
 - Put the binaries from `bin/Debug/net7.0/` on any web server of choice
+- Copy `InverterConfigs` directory with all it's contents from the source directory to the compiled binaries directory
 - Start the compiled executable file on the web server
 
