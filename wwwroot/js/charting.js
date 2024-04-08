@@ -17,16 +17,16 @@ function timeConverter(unixTimestamp, useYear = false, useMonth = false){
 
 const radioButtons = document.querySelectorAll('.btn-check');
 let timePeriodStr = `Week`;
+let dailyChart;
+let totalChart;
 
 radioButtons.forEach(button => {
 	button.addEventListener('change', function() {
 		if (this.checked) {
-			const selectedValue = this.nextElementSibling.textContent.trim();
-			// Perform action based on the selected radio button value
-			console.log(`Selected value: ${selectedValue}`);
-			timePeriodStr = selectedValue;
-			// Example: You can trigger functions or update content based on the selected value
-			// For demonstration purpose, let's log the selected value to the console
+			timePeriodStre = this.nextElementSibling.textContent.trim();
+			
+			// Refresh charts with new user-selected data period
+			updateCharts()
 		}
 	});
 });
@@ -254,30 +254,42 @@ async function updateCharts() {
 	};
 
 
-// Create charts
-	let dailyChart = new Chart(dailyChartContext, {
-		type: 'line',
-		data: dataDaily,
-		options: {
-			scales: {
-				y: {
-					beginAtZero: true
+// Create charts if they don't exist, otherwise update them
+	if (!dailyChart || !totalChart) {
+		dailyChart = new Chart(dailyChartContext, {
+			type: 'line',
+			data: dataDaily,
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
 				}
 			}
-		}
-	});
+		});
+		
+		totalChart = new Chart(totalChartContext, {
+			type: 'line',
+			data: dataTotal,
+			options: {
+				scales: {
+					y: {
+						beginAtZero: false
+					}
+				}
+			}
+		});
+	} else {
+		updateChartData(dataDaily, dataTotal);
+	}
+}
+
+function updateChartData(dataDaily, dataTotal) {
+	dailyChart.data = dataDaily;
+	dailyChart.update();
 	
-	let totalChart = new Chart(totalChartContext, {
-		type: 'line',
-		data: dataTotal,
-		options: {
-			scales: {
-				y: {
-					beginAtZero: false
-				}
-			}
-		}
-	});
+	totalChart.data = dataTotal;
+	totalChart.update();
 }
 
 updateCharts();
