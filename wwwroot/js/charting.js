@@ -23,7 +23,7 @@ let totalChart;
 radioButtons.forEach(button => {
 	button.addEventListener('change', function() {
 		if (this.checked) {
-			timePeriodStre = this.nextElementSibling.textContent.trim();
+			timePeriodStr = this.nextElementSibling.textContent.trim();
 			
 			// Refresh charts with new user-selected data period
 			updateCharts()
@@ -42,6 +42,10 @@ function strTimeToInt(string) {
 		case `week`: return 604800;
 		case `month`: return 2592000;
 		case `year`: return 31536000;
+		case `all time`: return (Date.now() /1000 |0)-1; // This is bad...?
+			// Later down the line this value gets subtracted from the current timestamp.
+			// But passing current date to get 0 doesn't work for some reason, hence -1 part.
+			// Basically it defaults to Jan 01 1970 00:00:01.
 	}
 }
 
@@ -126,7 +130,7 @@ function populateData(response, data) {
 
 async function updateCharts() {
 	let requestData = await getData()
-	// console.log(requestData)
+	// console.log((Date.now() /1000 |0)-strTimeToInt(timePeriodStr))
 
 	// Define chart data
 	let dataDaily = {
