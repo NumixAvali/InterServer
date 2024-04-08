@@ -104,12 +104,15 @@ function sendRequest() {
 }
 
 function populateData(response, data, timePeriod) {
-	const categories = [
+	const dailyCategories = [
 		'batterySoc',
 		'dailyProduction',
 		'dailyBatteryCharge',
 		'dailyBatteryDischarge',
 		'dailyLoadConsumption',
+	];
+	
+	const totalCategories = [
 		'totalProduction',
 		'totalBatteryCharge',
 		'totalBatteryDischarge',
@@ -119,7 +122,6 @@ function populateData(response, data, timePeriod) {
 	
 	const timePeriodSeconds = strTimeToInt(timePeriod);
 	const timeSpanSeconds = response.data[response.data.length - 1].timestamp - response.data[0].timestamp;
-	// TODO: expose this variable to user in UI.
 	const targetChunkCount = 200;
 	const chunkSizeSeconds = Math.ceil(timeSpanSeconds / targetChunkCount);
 	let currentChunkStart = response.data[0].timestamp;
@@ -129,7 +131,7 @@ function populateData(response, data, timePeriod) {
 	response.data.forEach((entry) => {
 		if (entry.timestamp >= currentChunkStart + chunkSizeSeconds) {
 			// Start a new chunk
-			categories.forEach((category) => {
+			dailyCategories.forEach((category) => {
 				data[category].labels.push(timeConverter(currentChunkStart));
 				data[category].values.push(currentChunkData[category].length > 0
 					? currentChunkData[category].reduce((a, b) => a + b, 0) / currentChunkData[category].length
@@ -140,7 +142,7 @@ function populateData(response, data, timePeriod) {
 			currentChunkCount = 0;
 		}
 		
-		categories.forEach((category) => {
+		dailyCategories.forEach((category) => {
 			const categoryData = entry.data[category];
 			if (!currentChunkData[category]) {
 				currentChunkData[category] = [];
@@ -151,14 +153,23 @@ function populateData(response, data, timePeriod) {
 		currentChunkCount++;
 	});
 	
-	// Push the last chunk of data
-	categories.forEach((category) => {
+	// Push the last chunk of data for daily categories
+	dailyCategories.forEach((category) => {
 		data[category].labels.push(timeConverter(currentChunkStart));
 		data[category].values.push(currentChunkData[category].length > 0
 			? currentChunkData[category].reduce((a, b) => a + b, 0) / currentChunkData[category].length
 			: null);
 	});
+	
+	// Process total categories
+	totalCategories.forEach((category) => {
+		const categoryData = response.data[response.data.length - 1].data[category];
+		data[category].unitOfMeasurement = categoryData.unit;
+		data[category].labels = ['Latest'];
+		data[category].values = [categoryData.value * categoryData.scale];
+	});
 }
+
 
 
 async function updateCharts() {
@@ -228,65 +239,40 @@ async function updateCharts() {
 	};
 	
 	let dataTotal = {
-		labels: requestData.batterySoc.labels,
+		labels: [
+			`Total production ${requestData.totalProduction.unitOfMeasurement}`,
+			`Energy bought ${requestData.totalEnergyBought.unitOfMeasurement}`,
+			`Energy sold ${requestData.totalEnergySold.unitOfMeasurement}`,
+			`Battery charge ${requestData.totalBatteryCharge.unitOfMeasurement}`,
+			`Battery discharge ${requestData.totalBatteryDischarge.unitOfMeasurement}`
+		],
 		datasets: [
 			{
-				label: `Total production ${requestData.totalProduction.unitOfMeasurement}`,
-				data: requestData.totalProduction.values,
+				label: 'Total Energy',
+				minBarLength: 10,
+				data: [
+					requestData.totalProduction.values[requestData.totalProduction.values.length - 1],
+					requestData.totalEnergyBought.values[requestData.totalEnergyBought.values.length - 1],
+					requestData.totalEnergySold.values[requestData.totalEnergySold.values.length - 1],
+					requestData.totalBatteryCharge.values[requestData.totalBatteryCharge.values.length - 1],
+					requestData.totalBatteryDischarge.values[requestData.totalBatteryDischarge.values.length - 1],
+				],
 				backgroundColor: [
 					'rgba(255, 99, 132, 0.2)',
-				],
-				borderColor: [
-					'rgba(255, 99, 132, 1)',
-				],
-				borderWidth: 1
-			},
-			{
-				label: `Energy bought ${requestData.totalEnergyBought.unitOfMeasurement}`,
-				data: requestData.totalEnergyBought.values,
-				backgroundColor: [
-					// 'rgba(255, 99, 132, 0.2)',
 					'rgba(54, 162, 235, 0.2)',
-				],
-				borderColor: [
-					// 'rgba(255, 99, 132, 1)',
-					'rgba(54, 162, 235, 1)',
-				],
-				borderWidth: 1
-			},
-			{
-				label: `Energy sold ${requestData.totalEnergySold.unitOfMeasurement}`,
-				data: requestData.totalEnergySold.values,
-				backgroundColor: [
 					'rgba(255, 206, 86, 0.2)',
-				],
-				borderColor: [
-					'rgba(255, 206, 86, 1)',
-				],
-				borderWidth: 1
-			},
-			{
-				label: `Battery charge ${requestData.totalBatteryCharge.unitOfMeasurement}`,
-				data: requestData.totalBatteryCharge.values,
-				backgroundColor: [
 					'rgba(75, 192, 192, 0.2)',
-				],
-				borderColor: [
-					'rgba(75, 192, 192, 1)',
-				],
-				borderWidth: 1
-			},
-			{
-				label: `Battery discharge ${requestData.totalBatteryDischarge.unitOfMeasurement}`,
-				data: requestData.totalBatteryDischarge.values,
-				backgroundColor: [
 					'rgba(153, 102, 255, 0.2)',
 				],
 				borderColor: [
+					'rgba(255, 99, 132, 1)',
+					'rgba(54, 162, 235, 1)',
+					'rgba(255, 206, 86, 1)',
+					'rgba(75, 192, 192, 1)',
 					'rgba(153, 102, 255, 1)',
 				],
-				borderWidth: 1
-			}
+				borderWidth: 1,
+			},
 		]
 	};
 
@@ -299,19 +285,19 @@ async function updateCharts() {
 			options: {
 				scales: {
 					y: {
-						beginAtZero: true
+						beginAtZero: false
 					}
 				}
 			}
 		});
 		
 		totalChart = new Chart(totalChartContext, {
-			type: 'line',
+			type: 'bar',
 			data: dataTotal,
 			options: {
 				scales: {
 					y: {
-						beginAtZero: false
+						beginAtZero: true
 					}
 				}
 			}
