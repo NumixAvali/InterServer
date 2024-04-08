@@ -54,7 +54,7 @@ async function getData() {
 	
 	try {
 		const response = await sendRequest();
-		populateData(response, data);
+		populateData(response, data, timePeriodStr);
 	} catch (error) {
 		console.error("Error during AJAX call:", error);
 	}
@@ -103,7 +103,7 @@ function sendRequest() {
 	});
 }
 
-function populateData(response, data) {
+function populateData(response, data, timePeriod) {
 	const categories = [
 		'batterySoc',
 		'dailyProduction',
@@ -117,13 +117,46 @@ function populateData(response, data) {
 		'totalEnergySold'
 	];
 	
+	const timePeriodSeconds = strTimeToInt(timePeriod);
+	const timeSpanSeconds = response.data[response.data.length - 1].timestamp - response.data[0].timestamp;
+	// TODO: expose this variable to user in UI.
+	const targetChunkCount = 200;
+	const chunkSizeSeconds = Math.ceil(timeSpanSeconds / targetChunkCount);
+	let currentChunkStart = response.data[0].timestamp;
+	let currentChunkData = {};
+	let currentChunkCount = 0;
+	
 	response.data.forEach((entry) => {
+		if (entry.timestamp >= currentChunkStart + chunkSizeSeconds) {
+			// Start a new chunk
+			categories.forEach((category) => {
+				data[category].labels.push(timeConverter(currentChunkStart));
+				data[category].values.push(currentChunkData[category].length > 0
+					? currentChunkData[category].reduce((a, b) => a + b, 0) / currentChunkData[category].length
+					: null);
+			});
+			currentChunkStart = entry.timestamp;
+			currentChunkData = {};
+			currentChunkCount = 0;
+		}
+		
 		categories.forEach((category) => {
-			const categoryData = response.data[0].data[category];
-			data[category].unitOfMeasurement = categoryData.unit;
-			data[category].labels.push(timeConverter(entry.timestamp));
-			data[category].values.push(categoryData.value * categoryData.scale);
+			const categoryData = entry.data[category];
+			if (!currentChunkData[category]) {
+				currentChunkData[category] = [];
+			}
+			currentChunkData[category].push(categoryData.value * categoryData.scale);
 		});
+		
+		currentChunkCount++;
+	});
+	
+	// Push the last chunk of data
+	categories.forEach((category) => {
+		data[category].labels.push(timeConverter(currentChunkStart));
+		data[category].values.push(currentChunkData[category].length > 0
+			? currentChunkData[category].reduce((a, b) => a + b, 0) / currentChunkData[category].length
+			: null);
 	});
 }
 
