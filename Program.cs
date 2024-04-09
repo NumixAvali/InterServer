@@ -37,7 +37,7 @@ builder.Services.AddRateLimiter(_ => _
 		options.QueueLimit = 5;
 	}));
 
-// Background timed data collector
+// Background services
 builder.Services.AddSingleton<DataCollector>();
 builder.Services.AddHostedService<DataCollector>();
 
@@ -62,7 +62,7 @@ try
 }
 catch (Exception e)
 {
-	Console.WriteLine("[Boot] Settings don't exist.");
+	app.Logger.LogInformation("[Boot] Settings don't exist.");
 	// throw;
 }
 app.UsePathBase("/"+pathPrefix+"/wwwroot");
