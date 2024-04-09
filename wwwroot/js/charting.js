@@ -189,7 +189,9 @@ async function updateCharts() {
 				borderColor: [
 					'rgba(255, 99, 132, 1)',
 				],
-				borderWidth: 1
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10
 			},
 			{
 				label: `Daily production ${requestData.dailyProduction.unitOfMeasurement}`,
@@ -200,7 +202,9 @@ async function updateCharts() {
 				borderColor: [
 					'rgba(54, 162, 235, 1)',
 				],
-				borderWidth: 1
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10
 			},
 			{
 				label: `Daily battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
@@ -211,7 +215,9 @@ async function updateCharts() {
 				borderColor: [
 					'rgba(255, 206, 86, 1)',
 				],
-				borderWidth: 1
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10
 			},
 			{
 				label: `Daily battery discharge ${requestData.dailyBatteryDischarge.unitOfMeasurement}`,
@@ -222,7 +228,9 @@ async function updateCharts() {
 				borderColor: [
 					'rgba(75, 192, 192, 1)',
 				],
-				borderWidth: 1
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10
 			},
 			{
 				label: `Daily consumption ${requestData.dailyLoadConsumption?.unitOfMeasurement}`,
@@ -233,7 +241,9 @@ async function updateCharts() {
 				borderColor: [
 					'rgba(153, 102, 255, 1)',
 				],
-				borderWidth: 1
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10
 			}
 		]
 	};
@@ -287,7 +297,8 @@ async function updateCharts() {
 					y: {
 						beginAtZero: false
 					}
-				}
+				},
+				stepped: 'middle',
 			}
 		});
 		
