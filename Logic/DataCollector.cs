@@ -37,7 +37,7 @@ public class DataCollector : BackgroundService
             else
             {
                 // Console.WriteLine("Data gathering disabled");
-                Thread.Sleep(1000);
+                await Task.Delay(1000, stoppingToken);
             }
         }
     }
