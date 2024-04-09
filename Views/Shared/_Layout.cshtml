@@ -33,7 +33,7 @@
         baseUrl = baseUrl.replace(controllerActionRegex, '');
 	}
 
-    baseUrl = (baseUrl === `/`) ? "@baseUrl" : baseUrl;
+    baseUrl = (baseUrl === `/` || !baseUrl) ? "@baseUrl" : baseUrl;
 	if ("@baseUrl" === `/`) baseUrl = ``;
 	// console.log("baseUrl:",baseUrl)
 	// console.log("baseUrlASP:","@baseUrl")
