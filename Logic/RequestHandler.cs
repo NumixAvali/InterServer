@@ -78,7 +78,7 @@ public class RequestHandler
 				// This hack is a very simple and sporadic value validator.
 				// Because sometimes for unknown reason reply might consist of a bunch of empty values,
 				// which ruin the whole point of the project.
-				FrameInfo tempCheck = preFinalJson.Data; //JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+				FrameInfo tempCheck = preFinalJson.Data;
 				while 
 				(
 					tempCheck.BatteryStatus.Value == 0 &&
@@ -90,9 +90,10 @@ public class RequestHandler
 					tempCheck.BatterySoc.Value == 0
 				)
 				{
-					Console.WriteLine("[Error correction] Invalid data frame received, requesting next one.");
+					Console.WriteLine("[Error correction] Invalid data frame received, requesting next one in 1s.");
+					Thread.Sleep(1000); // Prevents request bombing the inverter
 					preFinalJson = GetJson();
-					tempCheck = preFinalJson.Data; //JsonSerializer.Deserialize<FrameInfo>(preFinalJson.Data)!;
+					tempCheck = preFinalJson.Data;
 				}
 
 				break;
