@@ -78,8 +78,6 @@ let opts2 = {
 		{strokeStyle: "#30B32D", min: -6, max: -1}, // Red from 100 to 130
 		{strokeStyle: "#FFDD00", min: -1, max: 1}, // Yellow
 		{strokeStyle: "#F03E3E", min: 1, max: 6}, // Green
-		// {strokeStyle: "#FFDD00", min: 220, max: 260}, // Yellow
-		// {strokeStyle: "#F03E3E", min: 260, max: 300}  // Red
 	],
 };
 // Production and Consumption
@@ -211,7 +209,7 @@ function updateGauges(valuesObj) {
 	let label3 = document.getElementById('gauge-value-label3');
 	let label4 = document.getElementById('gauge-value-label4');
 	
-	console.log(valuesObj)
+	// console.log(valuesObj)
 	
 	$('#gauge-value-label1').html(`${valuesObj.data.batterySoc.value}`+`${valuesObj.data.batterySoc.unit}`)
 	$('#gauge-value-label2').html(`${valuesObj.data.batteryPower.value}`+`${valuesObj.data.batteryPower.unit}`)
