@@ -46,3 +46,33 @@
         transform: rotate(360deg);
     }
 }
+
+/* Gauge-related stuff */
+.gaugesContainer {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.gaugesContainer canvas {
+    margin: 0 10px;
+}
+
+.gauge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gauge-label {
+    margin-top: -20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.gauge-value-label {
+    margin-top: 10px;
+    margin-bottom: -20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
