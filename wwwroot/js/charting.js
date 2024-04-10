@@ -16,7 +16,7 @@ function timeConverter(unixTimestamp, useYear = false, useMonth = false){
 }
 
 const radioButtons = document.querySelectorAll('.btn-check');
-let timePeriodStr = `Week`;
+let timePeriodStr = `Day`;
 let dailyChart;
 let totalChart;
 
@@ -64,11 +64,16 @@ async function getData() {
 
 function initializeData() {
 	return {
-		batterySoc: initializeCategory(),
-		dailyProduction: initializeCategory(),
-		dailyBatteryCharge: initializeCategory(),
-		dailyBatteryDischarge: initializeCategory(),
-		dailyLoadConsumption: initializeCategory(),
+		// batterySoc: initializeCategory(),
+		batteryPower: initializeCategory(),
+		// dailyProduction: initializeCategory(),
+		// dailyBatteryCharge: initializeCategory(),
+		// dailyBatteryDischarge: initializeCategory(),
+		// dailyLoadConsumption: initializeCategory(),
+		loadL1Power: initializeCategory(),
+		loadL2Power: initializeCategory(),
+		pv1Power: initializeCategory(),
+		pv2Power: initializeCategory(),
 		totalBatteryCharge: initializeCategory(),
 		totalBatteryDischarge: initializeCategory(),
 		totalEnergyBought: initializeCategory(),
@@ -105,11 +110,17 @@ function sendRequest() {
 
 function populateData(response, data, timePeriod) {
 	const dailyCategories = [
-		'batterySoc',
-		'dailyProduction',
-		'dailyBatteryCharge',
-		'dailyBatteryDischarge',
-		'dailyLoadConsumption',
+		// 'batterySoc',
+		'batteryPower',
+		// 'dailyProduction',
+		// 'dailyBatteryCharge',
+		// 'dailyBatteryDischarge',
+		// 'dailyLoadConsumption',
+		
+		'loadL1Power',
+		'loadL2Power',
+		'pv1Power',
+		'pv2Power',
 	];
 	
 	const totalCategories = [
@@ -137,6 +148,17 @@ function populateData(response, data, timePeriod) {
 					? currentChunkData[category].reduce((a, b) => a + b, 0) / currentChunkData[category].length
 					: null);
 			});
+			
+			// Add LoadPower and pvPower to data object
+			data.loadPower = {
+				labels: data.loadL1Power.labels,
+				values: data.loadL1Power.values.map((val, index) => val + (data.loadL2Power.values[index] || 0))
+			};
+			data.pvPower = {
+				labels: data.pv1Power.labels,
+				values: data.pv1Power.values.map((val, index) => val + (data.pv2Power.values[index] || 0))
+			};
+			
 			currentChunkStart = entry.timestamp;
 			currentChunkData = {};
 			currentChunkCount = 0;
@@ -161,10 +183,21 @@ function populateData(response, data, timePeriod) {
 			: null);
 	});
 	
+	// Add LoadPower and pvPower to data object for the last chunk
+	data.loadPower = {
+		labels: data.loadL1Power.labels,
+		values: data.loadL1Power.values.map((val, index) => val + (data.loadL2Power.values[index] || 0))
+	};
+	data.pvPower = {
+		labels: data.pv1Power.labels,
+		values: data.pv1Power.values.map((val, index) => val + (data.pv2Power.values[index] || 0))
+	};
+	
 	// Process total categories
 	totalCategories.forEach((category) => {
 		const categoryData = response.data[response.data.length - 1].data[category];
-		data[category].unitOfMeasurement = categoryData.unit;
+		
+		if (categoryData.unit) data[category].unitOfMeasurement = categoryData.unit;
 		data[category].labels = ['Latest'];
 		data[category].values = [categoryData.value * categoryData.scale];
 	});
@@ -174,15 +207,15 @@ function populateData(response, data, timePeriod) {
 
 async function updateCharts() {
 	let requestData = await getData()
-	// console.log((Date.now() /1000 |0)-strTimeToInt(timePeriodStr))
+	// console.log(requestData)
 
 	// Define chart data
 	let dataDaily = {
-		labels: requestData.batterySoc.labels,
+		labels: requestData.batteryPower.labels,
 		datasets: [
 			{
-				label: `Battery level ${requestData.batterySoc.unitOfMeasurement}`,
-				data: requestData.batterySoc.values,
+				label: `Battery usage`,
+				data: requestData.batteryPower.values,
 				backgroundColor: [
 					'rgba(255, 99, 132, 0.2)',
 				],
@@ -194,8 +227,8 @@ async function updateCharts() {
 				hitRadius: 10
 			},
 			{
-				label: `Daily production ${requestData.dailyProduction.unitOfMeasurement}`,
-				data: requestData.dailyProduction.values,
+				label: `Production`,
+				data: requestData.loadPower.values,
 				backgroundColor: [
 					'rgba(54, 162, 235, 0.2)',
 				],
@@ -206,35 +239,35 @@ async function updateCharts() {
 				pointRadius: 1,
 				hitRadius: 10
 			},
+			// {
+			// 	label: `Daily battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
+			// 	data: requestData.dailyBatteryCharge.values,
+			// 	backgroundColor: [
+			// 		'rgba(255, 206, 86, 0.2)',
+			// 	],
+			// 	borderColor: [
+			// 		'rgba(255, 206, 86, 1)',
+			// 	],
+			// 	borderWidth: 1,
+			// 	pointRadius: 1,
+			// 	hitRadius: 10
+			// },
+			// {
+			// 	label: `Daily battery discharge ${requestData.dailyBatteryDischarge.unitOfMeasurement}`,
+			// 	data: requestData.dailyBatteryDischarge.values,
+			// 	backgroundColor: [
+			// 		'rgba(75, 192, 192, 0.2)',
+			// 	],
+			// 	borderColor: [
+			// 		'rgba(75, 192, 192, 1)',
+			// 	],
+			// 	borderWidth: 1,
+			// 	pointRadius: 1,
+			// 	hitRadius: 10
+			// },
 			{
-				label: `Daily battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
-				data: requestData.dailyBatteryCharge.values,
-				backgroundColor: [
-					'rgba(255, 206, 86, 0.2)',
-				],
-				borderColor: [
-					'rgba(255, 206, 86, 1)',
-				],
-				borderWidth: 1,
-				pointRadius: 1,
-				hitRadius: 10
-			},
-			{
-				label: `Daily battery discharge ${requestData.dailyBatteryDischarge.unitOfMeasurement}`,
-				data: requestData.dailyBatteryDischarge.values,
-				backgroundColor: [
-					'rgba(75, 192, 192, 0.2)',
-				],
-				borderColor: [
-					'rgba(75, 192, 192, 1)',
-				],
-				borderWidth: 1,
-				pointRadius: 1,
-				hitRadius: 10
-			},
-			{
-				label: `Daily consumption ${requestData.dailyLoadConsumption?.unitOfMeasurement}`,
-				data: requestData.dailyLoadConsumption.values,
+				label: `Consumption`,
+				data: requestData.pvPower.values,
 				backgroundColor: [
 					'rgba(153, 102, 255, 0.2)',
 				],
@@ -295,8 +328,13 @@ async function updateCharts() {
 			options: {
 				scales: {
 					y: {
-						beginAtZero: false
-					}
+						beginAtZero: false,
+						title: {
+							display: true,
+							text: 'W'
+						}
+					},
+					
 				},
 				stepped: 'middle',
 			}
@@ -308,7 +346,7 @@ async function updateCharts() {
 			options: {
 				scales: {
 					y: {
-						beginAtZero: true
+						beginAtZero: true,
 					}
 				}
 			}

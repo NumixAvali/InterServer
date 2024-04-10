@@ -3,10 +3,13 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<h6 class="display-6">Daily</h6>
+<h6 class="display-6">Power Profile</h6>
 <canvas id="historicChartDaily" width="600" height="340"></canvas>
 
-<h6 class="display-6">Total</h6>
+<h6 class="display-6">Generation and Usage History</h6>
+<canvas id="historicChartDaily2" width="600" height="340"></canvas>
+
+<h6 class="display-6">Totals</h6>
 <canvas id="historicChartTotal" width="600" height="340"></canvas>
 
 <div class="btn-group" role="group" aria-label="Time period selector">
@@ -19,10 +22,10 @@
     <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
     <label class="btn btn-outline-primary" for="btnradio3">Month</label>
 
-    <input type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off" checked>
+    <input type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off">
     <label class="btn btn-outline-primary" for="btnradio4">Week</label>
   
-    <input type="radio" class="btn-check" name="btnradio" id="btnradio5" autocomplete="off">
+    <input type="radio" class="btn-check" name="btnradio" id="btnradio5" autocomplete="off" checked>
     <label class="btn btn-outline-primary" for="btnradio5">Day</label>
 </div>
 
