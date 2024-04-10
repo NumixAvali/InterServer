@@ -213,13 +213,13 @@ function updateGauges(valuesObj) {
 	
 	$('#gauge-value-label1').html(`${valuesObj.data.batterySoc.value}`+`${valuesObj.data.batterySoc.unit}`)
 	$('#gauge-value-label2').html(`${valuesObj.data.batteryPower.value}`+`${valuesObj.data.batteryPower.unit}`)
-	$('#gauge-value-label3').html(`${valuesObj.data.pv2Power.value}`+`${valuesObj.data.pv2Power.unit}`)
-	$('#gauge-value-label4').html(`${valuesObj.data.pv1Power.value}`+`${valuesObj.data.pv1Power.unit}`)
+	$('#gauge-value-label3').html(`${valuesObj.data.pv1Power.value+valuesObj.data.pv2Power.value}`+`${valuesObj.data.pv1Power.unit}`)
+	$('#gauge-value-label4').html(`${valuesObj.data.loadL1Power.value+valuesObj.data.loadL2Power.value}`+`${valuesObj.data.loadL1Power.unit}`)
 	
 	gauge1.set(valuesObj.data.batterySoc.value)
 	gauge2.set(valuesObj.data.batteryPower.value/1000)
-	gauge3.set(valuesObj.data.pv2Power.value/1000)
-	gauge4.set(valuesObj.data.pv1Power.value/1000)
+	gauge3.set((valuesObj.data.pv1Power.value+valuesObj.data.pv2Power.value)/1000)
+	gauge4.set((valuesObj.data.loadL1Power.value+valuesObj.data.loadL2Power.value)/1000)
 }
 
 
