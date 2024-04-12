@@ -310,7 +310,7 @@ function refreshDataOnLoad() {
 			
 			$('#refreshBtn').prop('disabled',false)
 				.html('Refresh')
-			console.log(reply)
+			// console.log(reply)
 		},
 		error: function (error) {
 			console.error(`Refresh data error!\n`,error)
