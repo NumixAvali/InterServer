@@ -150,18 +150,129 @@ gauge4.animationSpeed = 64;
 gauge4.setMinValue(0);
 gauge4.set(0);
 
+const tableKeysEnum = {
+	system: [
+		'communicationBoardVersion',
+		'controlBoardVersion',
+		'usageTime',
+		'workMode',
+		'smartLoadEnableStatus',
+		'alert',
+		'acTemperature',
+		'dcTemperature',
+		'gridConnectedStatus',
+		'genConnectedStatus',
+		'batteryStatus'
+	],
+	battery: [
+		'batteryCurrent',
+		'batterySoc',
+		'batteryPower',
+		'dailyBatteryCharge',
+		'dailyBatteryDischarge',
+		'totalBatteryCharge',
+		'totalBatteryDischarge'
+	],
+	load:[
+		'loadL1Power',
+		'loadL2Power',
+		'pv1Current',
+		'pv2Current',
+		'pv1Voltage',
+		'pv2Voltage',
+		'pv1Power',
+		'pv2Power'
+	],
+	inverter: [
+		'inverterStatus',
+		'inverterL1Power',
+		'inverterL2Power',
+		'internalL1LoadPower',
+		'internalL2LoadPower'
+	],
+	grid: [
+		'gridConnectedStatus',
+		'gridFrequency',
+		'gridL1Current',
+		'gridL2Current',
+		'gridL1Voltage',
+		'gridL2Voltage'
+	],
+	daily: [
+		'dailyLoadConsumption',
+		'dailyProduction',
+		'dailyBatteryCharge',
+		'dailyBatteryDischarge',
+		'dailyEnergyBought',
+		'dailyEnergySold',
+		'dailyBatteryCharge',
+		'dailyBatteryDischarge'
+	],
+	total: [
+		'totalProduction',
+		'totalBatteryCharge',
+		'totalBatteryDischarge',
+		'totalEnergyBought',
+		'totalEnergySold',
+		'totalLoadConsumption',
+		'totalBatteryCharge',
+		'totalBatteryDischarge'
+	],
+};
+
 
 function refreshBtnClick() {
-	$('#currentData').addClass(`lds-dual-ring`)
+	// Before reply
+	$('#refreshBtn').prop('disabled',true)
+		.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>\n' +
+			'  Refreshing...')
+	
+	$('#currentDataSystem').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataBattery').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataLoad').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataInverter').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataGrid').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataDaily').html('')
+		.addClass(`lds-dual-ring`)
+	$('#currentDataTotal').html('')
+		.addClass(`lds-dual-ring`)
+	
+	$('#currentDataAll').addClass(`lds-dual-ring`)
 		.html("")
+	
+	
 	$.ajax({
 		type: "GET",
 		url: `${baseUrl}/api/v1/data/current`,
 		success: function (reply) {
+			// After reply
 			// console.log(reply)
-			$('#currentData').html(parseReplyToHtml(reply))
+			$('#currentDataSystem').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.system))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataBattery').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.battery))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataLoad').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.load))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataInverter').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.inverter))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataGrid').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.grid))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataDaily').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.daily))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataTotal').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.total))
 				.removeClass(`lds-dual-ring`)
 			
+			$('#currentDataAll').html(parseReplyToHtml(reply))
+				.removeClass(`lds-dual-ring`)
+			
+			
+			$('#refreshBtn').prop('disabled',false)
+				.html('Refresh')
 		},
 		error: function (error) {
 			console.error(`Refresh button error!\n`,error)
@@ -171,13 +282,35 @@ function refreshBtnClick() {
 }
 
 function refreshDataOnLoad() {
+	$('#refreshBtn').prop('disabled',true)
+		.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>\n' +
+			'  Loading...')
+	
 	$.ajax({
 		type: "GET",
 		url: `${baseUrl}/api/v1/data/current`,
 		success: function (reply) {
-			$('#currentData').html(parseReplyToHtml(reply))
+			$('#currentDataAll').html(parseReplyToHtml(reply))
 				.removeClass(`lds-dual-ring`)
-			// console.log(reply)
+			$('#currentDataSystem').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.system))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataBattery').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.battery))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataLoad').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.load))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataInverter').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.inverter))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataGrid').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.grid))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataDaily').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.daily))
+				.removeClass(`lds-dual-ring`)
+			$('#currentDataTotal').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.total))
+				.removeClass(`lds-dual-ring`)
+			
+			
+			$('#refreshBtn').prop('disabled',false)
+				.html('Refresh')
+			console.log(reply)
 		},
 		error: function (error) {
 			console.error(`Refresh data error!\n`,error)
@@ -202,6 +335,24 @@ function parseReplyToHtml(replyObj) {
 	htmlOutput += '</table>';
 	return htmlOutput;
 }
+
+function parseReplyToHtmlKeyed(replyObj,keysArr) {
+	let htmlOutput = '<table class="tableDecor">';
+	
+	// Iterate through the data object
+	for (const [key, value] of Object.entries(replyObj.data)) {
+		if (keysArr.includes(key)) {
+			htmlOutput += '<tr>';
+			htmlOutput += `<td>${value.title}</td>`;
+			htmlOutput += `<td>${value.value * value.scale}${value.unit}</td>`;
+			htmlOutput += '</tr>';
+		}
+	}
+	
+	htmlOutput += '</table>';
+	return htmlOutput;
+}
+
 
 function updateGauges(valuesObj) {
 	let label1 = document.getElementById('gauge-value-label1');
