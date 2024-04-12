@@ -1,4 +1,5 @@
 let dailyChartContext = document.getElementById('historicChartDaily').getContext('2d');
+// let dailyChartContext2 = document.getElementById('historicChartDaily2').getContext('2d');
 let totalChartContext = document.getElementById('historicChartTotal').getContext('2d');
 
 function timeConverter(unixTimestamp, useYear = false, useMonth = false){
