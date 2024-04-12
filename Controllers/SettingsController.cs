@@ -59,4 +59,17 @@ public class SettingsController
         }
     }
 
+    public string[] GetConfigs()
+    {
+        try
+        {
+            return Directory.GetFiles("./InverterConfigs");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("[Settings] Error getting config list!\n"+e);
+            throw;
+        }
+    }
+
 }

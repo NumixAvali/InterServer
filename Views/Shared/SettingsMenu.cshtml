@@ -1,3 +1,10 @@
+@using InterServer.Logic
+@using InterServer.Controllers
+
+@{
+    AppSettings settings = new SettingsController().GetSettings();
+}
+
 <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -10,7 +17,7 @@
                 @* Config selection field *@
                 <label for="configSelection" class="form-label">Inverter config file for data parsing</label>
                 <select class="form-select" id="configSelection" aria-label="Default select example">
-                    <option selected>Select inverter config...</option>
+                    <option selected disabled>Select inverter config...</option>
                     <option value="1">Config One</option>
                     <option value="2">Config Two</option>
                     <option value="3">Config Three</option>
@@ -18,7 +25,26 @@
                 <br/>
                 @* Serial number field *@
                 <label for="serialNumberInput" class="form-label">Inverter serial number</label>
-                <input class="form-control" id="serialNumberInput" placeholder="1234567890">
+                <input class="form-control" id="serialNumberInput" placeholder="1234567890" value="@settings.SerialNumber">
+                <br/>
+                @* Inverter IP and port fields *@
+                <label for="inverterPortInput" class="form-label">Inverter connection credentials</label>
+                <div id="inverterPortInput" class="container">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="ip-input">IP Address:</label>
+                        <input type="text" class="form-control" id="ip-input" placeholder="Enter IP Address" value="@settings.InverterIp">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="port-input">Port:</label>
+                        <input type="text" class="form-control" id="port-input" placeholder="Enter Port" value="@settings.InverterPort">
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <br/>
                 @* DB settings *@
                 <label class="form-label">DB settings</label>
@@ -30,34 +56,35 @@
                         id="dbSettingsName"
                         aria-label="DB name"
                         placeholder="Measurements"
+                        value="@settings.DbName"
                     >
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsPass" class="input-group-text">DB password</label>
-                    <input type="text" class="form-control" id="dbSettingsPass" aria-label="DB password">
+                    <input type="password" class="form-control" id="dbSettingsPass" aria-label="DB password" value="@settings.DbPassword">
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsUser" class="input-group-text">DB username</label>
-                    <input type="text" class="form-control" id="dbSettingsUser" aria-label="DB username">
+                    <input type="text" class="form-control" id="dbSettingsUser" aria-label="DB username" placeholder="admin" value="@settings.DbUsername">
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsIp" class="input-group-text">DB IP</label>
-                    <input type="text" class="form-control" id="dbSettingsIp" aria-label="DB IP">
+                    <input type="text" class="form-control" id="dbSettingsIp" aria-label="DB IP" placeholder="127.0.0.1" value="@settings.DbIp">
                 </div>
                 @* Data gathering worker settings *@
                 <label for="workerProcessSwitch" class="form-label">Timed data gathering service</label>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="workerProcessSwitch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="workerProcessSwitch" @(settings.EnableAutomaticDataGather ? "checked" : "")>
                     <label class="form-check-label" for="workerProcessSwitch">Enable data gathering service</label>
                 </div>
                 <div class="input-group mb-3">
                     <label class="input-group-text" for="gatherIntervalValue">Every</label>
-                    <input type="text" class="form-control" id="gatherIntervalValue" aria-label="Text input with dropdown button">
+                    <input type="text" class="form-control" id="gatherIntervalValue" aria-label="Text input with dropdown button" value="@settings.AutomaticGatherInterval">
                     <select class="form-select" id="gatherIntervalModifier">
-                        <option selected>Choose...</option>
-                        <option value="1">Seconds</option>
-                        <option value="2">Minutes</option>
-                        <option value="3">Hours</option>
+                        <option selected disabled>Choose...</option>
+                        <option value="1" selected="@(settings.AutomaticGatherIntervalModifier == 1000)">Seconds</option>
+                        <option value="2" selected="@(settings.AutomaticGatherIntervalModifier == 60000)">Minutes</option>
+                        <option value="3" selected="@(settings.AutomaticGatherIntervalModifier == 360000)">Hours</option>
                     </select>
                 </div>
 
