@@ -15,6 +15,7 @@ function formatNumber(number) {
 	return number < 10 ? '0' + number : number;
 }
 
+const savedTheme = Cookies.get('dark_mode_theme') || 'dark';
 
 // Battery charge %
 let opts1 = {
@@ -24,20 +25,20 @@ let opts1 = {
 	pointer: {
 		length: 0.7,
 		strokeWidth: 0.035,
-		color: '#000000'
+		color: savedTheme === 'light' ? '#000000' : '#fff'
 	},
 	limitMax: false,
 	limitMin: false,
-	colorStart: '#6FADCF',
-	colorStop: '#8FC0DA',
-	strokeColor: '#E0E0E0',
+	colorStart: savedTheme === 'light' ?  '#6FADCF' : '#4A7C9D',
+	colorStop: savedTheme === 'light' ? '#8FC0DA' : '#6488A4',
+	strokeColor: savedTheme === 'light' ? '#E0E0E0' : '#505050',
 	generateGradient: true,
 	highDpiSupport: true,
 	radiusScale: 0.6,
 	staticLabels: {
 		font: "14px sans-serif",
 		labels: [0,25,50,75,100],
-		color: '#000000',
+		color: savedTheme === 'light' ? '#000000' : '#dedede',
 		fractionDigits: 0,
 	},
 	renderTicks: {
@@ -66,20 +67,20 @@ let opts2 = {
 	pointer: {
 		length: 0.7,
 		strokeWidth: 0.035,
-		color: '#000000'
+		color: savedTheme === 'light' ? '#000000' : '#fff'
 	},
 	limitMax: false,
 	limitMin: false,
-	colorStart: '#6FADCF',
-	colorStop: '#8FC0DA',
-	strokeColor: '#E0E0E0',
+	colorStart: savedTheme === 'light' ?  '#6FADCF' : '#4A7C9D',
+	colorStop: savedTheme === 'light' ? '#8FC0DA' : '#6488A4',
+	strokeColor: savedTheme === 'light' ? '#E0E0E0' : '#505050',
 	generateGradient: true,
 	highDpiSupport: true,
 	radiusScale: 0.6,
 	staticLabels: {
 		font: "14px sans-serif",
 		labels: [-6,-3,-1,0,1,3,6],
-		color: '#000000',
+		color: savedTheme === 'light' ? '#000000' : '#dedede',
 		fractionDigits: 0,
 	},
 	renderTicks: {
@@ -106,31 +107,31 @@ let opts3 = {
 	pointer: {
 		length: 0.7,
 		strokeWidth: 0.035,
-		color: '#000000'
+		color: savedTheme === 'light' ? '#000000' : '#fff'
 	},
 	limitMax: false,
 	limitMin: false,
-	colorStart: '#6FADCF',
-	colorStop: '#8FC0DA',
-	strokeColor: '#E0E0E0',
+	colorStart: savedTheme === 'light' ?  '#6FADCF' : '#4A7C9D',
+	colorStop: savedTheme === 'light' ? '#8FC0DA' : '#6488A4',
+	strokeColor: savedTheme === 'light' ? '#E0E0E0' : '#505050',
 	generateGradient: true,
 	highDpiSupport: true,
 	radiusScale: 0.6,
 	staticLabels: {
 		font: "14px sans-serif",
 		labels: [0,2,4,6,8],
-		color: '#000000',
+		color: savedTheme === 'light' ? '#000000' : '#dedede',
 		fractionDigits: 0,
 	},
 	renderTicks: {
 		divisions: 4,
 		divWidth: 1.1,
 		divLength: 0.5,
-		divColor: '#333333',
+		divColor: savedTheme === 'light' ? '#333333' : '#eee',
 		subDivisions: 5,
 		subLength: 0.3,
 		subWidth: 0.6,
-		subColor: '#666666'
+		subColor: savedTheme === 'light' ? '#666666' : '#888'
 	},
 };
 

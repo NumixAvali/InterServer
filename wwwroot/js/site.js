@@ -2,6 +2,7 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+const darkModeToggle = document.querySelector('#dark-mode-toggle');
 
 // When the user scrolls down 200px from the top of the document, show the button
 window.onscroll = function () {
@@ -18,6 +19,11 @@ window.onscroll = function () {
 scrollToTopBtn.addEventListener("click", function () {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
+});
+
+darkModeToggle.addEventListener('change', () => {
+    const newTheme = darkModeToggle.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', newTheme);
 });
 
 $(document).ready(function () {
@@ -63,5 +69,21 @@ $(document).ready(function () {
     
     $('.modal').on('click', '.close', function(){
         $('#settingsModal').modal('hide');
+    });
+    
+    // Dark mode handling
+    const themeCookieName = 'dark_mode_theme';
+    const defaultTheme = 'dark';
+    
+    const savedTheme = Cookies.get(themeCookieName) || defaultTheme;
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    
+    darkModeToggle.checked = savedTheme === 'dark';
+    
+    darkModeToggle.addEventListener('change', () => {
+        const newTheme = darkModeToggle.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', newTheme);
+        
+        Cookies.set(themeCookieName, newTheme);
     });
 });
