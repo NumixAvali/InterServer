@@ -25,7 +25,7 @@
                         string configName = config
                             .Replace(".yaml", "")
                             .Replace("./InverterConfigs", "")
-                            .Remove(0,1);
+                            .Remove(0, 1);
                         <option value="@configName" selected="@(settings.ConfigName == configName + ".yaml")">@configName</option>
                     }
                 </select>
@@ -37,20 +37,20 @@
                 @* Inverter IP and port fields *@
                 <label for="inverterPortInput" class="form-label">Inverter connection credentials</label>
                 <div id="inverterPortInput" class="container">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="ip-input">IP Address:</label>
-                        <input type="text" class="form-control" id="ip-input" placeholder="Enter IP Address" value="@settings.InverterIp">
-                      </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ip-input">IP Address:</label>
+                                <input type="text" class="form-control" id="ip-input" placeholder="Enter IP Address" value="@settings.InverterIp">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="port-input">Port:</label>
+                                <input type="text" class="form-control" id="port-input" placeholder="Enter Port" value="@settings.InverterPort">
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="port-input">Port:</label>
-                        <input type="text" class="form-control" id="port-input" placeholder="Enter Port" value="@settings.InverterPort">
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 <br/>
                 @* DB settings *@
@@ -63,8 +63,7 @@
                         id="dbSettingsName"
                         aria-label="DB name"
                         placeholder="Measurements"
-                        value="@settings.DbName"
-                    >
+                        value="@settings.DbName">
                 </div>
                 <div class="input-group mb-3">
                     <label for="dbSettingsPass" class="input-group-text">DB password</label>

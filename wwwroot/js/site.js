@@ -1,7 +1,7 @@
 ﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
-let scrollToTopBtn = document.getElementById("scrollToTopBtn");
+const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 
 // When the user scrolls down 200px from the top of the document, show the button
 window.onscroll = function () {
@@ -44,7 +44,7 @@ $(document).ready(function () {
         
         // TODO: finish making endpoint for that, or come up with other way to do it without endpoint.
         $.ajax({
-            url: pageUrl,
+            url: baseUrl,
             type: 'POST',
             data: JSON.stringify(settings),
             contentType: 'application/json',

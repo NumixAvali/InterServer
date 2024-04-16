@@ -288,23 +288,23 @@ function refreshDataOnLoad() {
 	
 	$.ajax({
 		type: "GET",
-		url: `${baseUrl}/api/v1/data/current`,
+		url: `${baseUrl}/api/v1/cache/latest`,
 		success: function (reply) {
-			$('#currentDataAll').html(parseReplyToHtml(reply))
+			$('#currentDataAll').html(parseReplyToHtml(reply.data))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataSystem').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.system))
+			$('#currentDataSystem').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.system))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataBattery').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.battery))
+			$('#currentDataBattery').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.battery))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataLoad').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.load))
+			$('#currentDataLoad').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.load))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataInverter').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.inverter))
+			$('#currentDataInverter').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.inverter))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataGrid').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.grid))
+			$('#currentDataGrid').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.grid))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataDaily').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.daily))
+			$('#currentDataDaily').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.daily))
 				.removeClass(`lds-dual-ring`)
-			$('#currentDataTotal').html(parseReplyToHtmlKeyed(reply,tableKeysEnum.total))
+			$('#currentDataTotal').html(parseReplyToHtmlKeyed(reply.data,tableKeysEnum.total))
 				.removeClass(`lds-dual-ring`)
 			
 			

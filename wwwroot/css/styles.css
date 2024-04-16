@@ -8,10 +8,10 @@
     font-size: 24px;
     border: none;
     outline: none;
-    background-color: #007bff;
+    background-color: #3b88c3;
     color: white;
     cursor: pointer;
-    padding: 10px 15px;
+    padding: 10px 12px;
     border-radius: 5px;
     transition: opacity 0.3s ease;
     opacity: 0;
