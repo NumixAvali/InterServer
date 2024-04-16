@@ -63,7 +63,7 @@ public class SettingsController
     {
         try
         {
-            return Directory.GetFiles("./InverterConfigs");
+            return Directory.GetFiles("./InverterConfigs","*.yaml");
         }
         catch (Exception e)
         {

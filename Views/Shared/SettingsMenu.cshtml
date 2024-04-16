@@ -2,7 +2,9 @@
 @using InterServer.Controllers
 
 @{
-    AppSettings settings = new SettingsController().GetSettings();
+    SettingsController controller = new SettingsController();
+    AppSettings settings = controller.GetSettings();
+    string[] configs = controller.GetConfigs();
 }
 
 <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
@@ -18,9 +20,14 @@
                 <label for="configSelection" class="form-label">Inverter config file for data parsing</label>
                 <select class="form-select" id="configSelection" aria-label="Default select example">
                     <option selected disabled>Select inverter config...</option>
-                    <option value="1">Config One</option>
-                    <option value="2">Config Two</option>
-                    <option value="3">Config Three</option>
+                    @foreach (var config in configs)
+                    {
+                        string configName = config
+                            .Replace(".yaml", "")
+                            .Replace("./InverterConfigs", "")
+                            .Remove(0,1);
+                        <option value="@configName" selected="@(settings.ConfigName == configName + ".yaml")">@configName</option>
+                    }
                 </select>
                 <br/>
                 @* Serial number field *@
@@ -82,9 +89,9 @@
                     <input type="text" class="form-control" id="gatherIntervalValue" aria-label="Text input with dropdown button" value="@settings.AutomaticGatherInterval">
                     <select class="form-select" id="gatherIntervalModifier">
                         <option selected disabled>Choose...</option>
-                        <option value="1" selected="@(settings.AutomaticGatherIntervalModifier == 1000)">Seconds</option>
-                        <option value="2" selected="@(settings.AutomaticGatherIntervalModifier == 60000)">Minutes</option>
-                        <option value="3" selected="@(settings.AutomaticGatherIntervalModifier == 360000)">Hours</option>
+                        <option value="1000" selected="@(settings.AutomaticGatherIntervalModifier == 1000)">Seconds</option>
+                        <option value="60000" selected="@(settings.AutomaticGatherIntervalModifier == 60000)">Minutes</option>
+                        <option value="360000" selected="@(settings.AutomaticGatherIntervalModifier == 360000)">Hours</option>
                     </select>
                 </div>
 
