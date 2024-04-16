@@ -72,10 +72,7 @@ $(document).ready(function () {
     });
     
     // Dark mode handling
-    const themeCookieName = 'dark_mode_theme';
-    const defaultTheme = 'dark';
-    
-    const savedTheme = Cookies.get(themeCookieName) || defaultTheme;
+    const savedTheme = Cookies.get('dark_mode_theme') || 'dark';
     document.documentElement.setAttribute('data-bs-theme', savedTheme);
     
     darkModeToggle.checked = savedTheme === 'dark';
@@ -84,6 +81,6 @@ $(document).ready(function () {
         const newTheme = darkModeToggle.checked ? 'dark' : 'light';
         document.documentElement.setAttribute('data-bs-theme', newTheme);
         
-        Cookies.set(themeCookieName, newTheme);
+        Cookies.set('dark_mode_theme', newTheme);
     });
 });
