@@ -29,22 +29,24 @@ $(document).ready(function () {
     
     $('#saveSettingsButton').click(function() {
         
-        let settings= {
-            ConfigName: $('#configSelection').val(),
+        let settings = {
+            ConfigName: $('#configSelection').val() + '.yaml',
             SerialNumber: $('#serialNumberInput').val(),
+            InverterIp: $('#ip-input').val(),
+            InverterPort: $('#port-input').val(),
             DbName: $('#dbSettingsName').val(),
             DbPassword: $('#dbSettingsPass').val(),
             DbUsername: $('#dbSettingsUser').val(),
             DbIp: $('#dbSettingsIp').val(),
-            EnableAutomaticDataGather: $('#workerProcessSwitch').val(),
+            EnableAutomaticDataGather: $('#workerProcessSwitch').prop('checked'),
             AutomaticGatherInterval: $('#gatherIntervalValue').val(),
             AutomaticGatherIntervalModifier: $('#gatherIntervalModifier').val(),
-        }
-        // console.log(settings)
+            pathPrefix: baseUrl.startsWith('/') ? baseUrl.substring(1) : baseUrl,
+        };
+        console.log(settings)
         
-        // TODO: finish making endpoint for that, or come up with other way to do it without endpoint.
         $.ajax({
-            url: baseUrl,
+            url: baseUrl+"/internal/submit-settings",
             type: 'POST',
             data: JSON.stringify(settings),
             contentType: 'application/json',

@@ -1,19 +1,23 @@
 using System.Text.Json;
 using InterServer.Logic;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InterServer.Controllers;
 
-public class SettingsController
+[Route("interserver/internal")]
+[Route("internal")]
+[ApiController]
+public class SettingsController : ControllerBase
 {
     public AppSettings GetSettings()
     {
-        if (!File.Exists("./settings.json"))
+        if (!System.IO.File.Exists("./settings.json"))
         {
             Console.WriteLine("[Settings] Attempt to read non-existent settings file!");
             throw new InvalidDataException("Failed to read and return settings file value.");
         }
 
-        string settingsString = File.ReadAllText("./settings.json");
+        string settingsString = System.IO.File.ReadAllText("./settings.json");
         AppSettings appSettingsObj;
 
         try
@@ -28,18 +32,18 @@ public class SettingsController
         }
     }
     
-    public void SaveSettings(AppSettings appSettings)
+    private static void SaveSettings(AppSettings appSettings)
     {
         string jsonSettings = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions
         {
             WriteIndented = true
         });
 
-        if (File.Exists("./settings.json"))
+        if (System.IO.File.Exists("./settings.json"))
         {
             try
             {
-                File.Move("./settings.json","./settings.json.bak");
+                System.IO.File.Move("./settings.json","./settings.json.bak");
             }
             catch (Exception e)
             {
@@ -50,7 +54,7 @@ public class SettingsController
 
         try
         {
-            File.WriteAllText("./settings.json",jsonSettings);
+            System.IO.File.WriteAllText("./settings.json",jsonSettings);
         }
         catch (Exception e)
         {
@@ -72,4 +76,11 @@ public class SettingsController
         }
     }
 
+    [HttpPost, Route("submit-settings")]
+    public IActionResult ReceiveSettings([FromBody] AppSettings settings)
+    {
+        SaveSettings(settings);
+        Console.WriteLine("[Settings] settings were updated.");
+        return Ok();
+    }
 }

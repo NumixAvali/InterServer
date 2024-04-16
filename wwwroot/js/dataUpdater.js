@@ -1,3 +1,21 @@
+function timeConverter(unixTimestamp, useYear = false, useMonth = false) {
+	let a = new Date(unixTimestamp * 1000);
+	let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	let year = useYear ? a.getFullYear() : '';
+	let month = months[a.getMonth()];
+	let date = a.getDate();
+	let hour = formatNumber(a.getHours());
+	let min = formatNumber(a.getMinutes());
+	let sec = formatNumber(a.getSeconds());
+	let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+	return time;
+}
+
+function formatNumber(number) {
+	return number < 10 ? '0' + number : number;
+}
+
+
 // Battery charge %
 let opts1 = {
 	lines: 12,
@@ -366,6 +384,7 @@ function updateGauges(valuesObj) {
 	$('#gauge-value-label2').html(`${valuesObj.data.batteryPower.value}`+`${valuesObj.data.batteryPower.unit}`)
 	$('#gauge-value-label3').html(`${valuesObj.data.pv1Power.value+valuesObj.data.pv2Power.value}`+`${valuesObj.data.pv1Power.unit}`)
 	$('#gauge-value-label4').html(`${valuesObj.data.loadL1Power.value+valuesObj.data.loadL2Power.value}`+`${valuesObj.data.loadL1Power.unit}`)
+	$('#dataFreshnessTimestamp').html(`Showing data from: `+timeConverter(valuesObj.timestamp))
 	
 	gauge1.set(valuesObj.data.batterySoc.value)
 	gauge2.set(valuesObj.data.batteryPower.value/1000)
