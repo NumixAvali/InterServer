@@ -1,5 +1,5 @@
 let dailyChartContext = document.getElementById('historicChartDaily').getContext('2d');
-// let dailyChartContext2 = document.getElementById('historicChartDaily2').getContext('2d');
+let dailyTotalChartContext = document.getElementById('historicChartDailyTotals').getContext('2d');
 let totalChartContext = document.getElementById('historicChartTotal').getContext('2d');
 
 function timeConverter(unixTimestamp, useYear = false, useMonth = false){
@@ -20,6 +20,7 @@ const radioButtons = document.querySelectorAll('.btn-check');
 let timePeriodStr = `Day`;
 let dailyChart;
 let totalChart;
+let dailyTotalChart;
 
 radioButtons.forEach(button => {
 	button.addEventListener('change', function() {
@@ -55,7 +56,7 @@ async function getData() {
 	
 	try {
 		const response = await sendRequest();
-		populateData(response, data, timePeriodStr);
+		populateData(response, data);
 	} catch (error) {
 		console.error("Error during AJAX call:", error);
 	}
@@ -67,10 +68,10 @@ function initializeData() {
 	return {
 		// batterySoc: initializeCategory(),
 		batteryPower: initializeCategory(),
-		// dailyProduction: initializeCategory(),
-		// dailyBatteryCharge: initializeCategory(),
-		// dailyBatteryDischarge: initializeCategory(),
-		// dailyLoadConsumption: initializeCategory(),
+		dailyProduction: initializeCategory(100),
+		dailyBatteryCharge: initializeCategory(100),
+		dailyBatteryDischarge: initializeCategory(100),
+		dailyLoadConsumption: initializeCategory(100),
 		loadL1Power: initializeCategory(),
 		loadL2Power: initializeCategory(),
 		pv1Power: initializeCategory(),
@@ -83,11 +84,12 @@ function initializeData() {
 	};
 }
 
-function initializeCategory() {
+function initializeCategory(chunkCount = 200) {
 	return {
 		unitOfMeasurement: "",
 		labels: [],
-		values: []
+		values: [],
+		targetChunkCount: chunkCount
 	};
 }
 
@@ -109,14 +111,15 @@ function sendRequest() {
 	});
 }
 
-function populateData(response, data, timePeriod) {
+function populateData(response, data) {
 	const dailyCategories = [
 		// 'batterySoc',
 		'batteryPower',
-		// 'dailyProduction',
-		// 'dailyBatteryCharge',
-		// 'dailyBatteryDischarge',
-		// 'dailyLoadConsumption',
+		
+		'dailyProduction',
+		'dailyBatteryCharge',
+		'dailyBatteryDischarge',
+		'dailyLoadConsumption',
 		
 		'loadL1Power',
 		'loadL2Power',
@@ -132,7 +135,6 @@ function populateData(response, data, timePeriod) {
 		'totalEnergySold'
 	];
 	
-	const timePeriodSeconds = strTimeToInt(timePeriod);
 	const timeSpanSeconds = response.data[response.data.length - 1].timestamp - response.data[0].timestamp;
 	const targetChunkCount = 200;
 	const chunkSizeSeconds = Math.ceil(timeSpanSeconds / targetChunkCount);
@@ -208,7 +210,7 @@ function populateData(response, data, timePeriod) {
 
 async function updateCharts() {
 	let requestData = await getData()
-	// console.log(requestData)
+	console.log(requestData)
 
 	// Define chart data
 	let dataDaily = {
@@ -240,32 +242,6 @@ async function updateCharts() {
 				pointRadius: 1,
 				hitRadius: 10
 			},
-			// {
-			// 	label: `Daily battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
-			// 	data: requestData.dailyBatteryCharge.values,
-			// 	backgroundColor: [
-			// 		'rgba(255, 206, 86, 0.2)',
-			// 	],
-			// 	borderColor: [
-			// 		'rgba(255, 206, 86, 1)',
-			// 	],
-			// 	borderWidth: 1,
-			// 	pointRadius: 1,
-			// 	hitRadius: 10
-			// },
-			// {
-			// 	label: `Daily battery discharge ${requestData.dailyBatteryDischarge.unitOfMeasurement}`,
-			// 	data: requestData.dailyBatteryDischarge.values,
-			// 	backgroundColor: [
-			// 		'rgba(75, 192, 192, 0.2)',
-			// 	],
-			// 	borderColor: [
-			// 		'rgba(75, 192, 192, 1)',
-			// 	],
-			// 	borderWidth: 1,
-			// 	pointRadius: 1,
-			// 	hitRadius: 10
-			// },
 			{
 				label: `Consumption`,
 				data: requestData.pvPower.values,
@@ -284,15 +260,15 @@ async function updateCharts() {
 	
 	let dataTotal = {
 		labels: [
-			`Total production ${requestData.totalProduction.unitOfMeasurement}`,
-			`Energy bought ${requestData.totalEnergyBought.unitOfMeasurement}`,
-			`Energy sold ${requestData.totalEnergySold.unitOfMeasurement}`,
-			`Battery charge ${requestData.totalBatteryCharge.unitOfMeasurement}`,
-			`Battery discharge ${requestData.totalBatteryDischarge.unitOfMeasurement}`
+			`Total production`,
+			`Energy bought`,
+			`Energy sold`,
+			`Battery charge`,
+			`Battery discharge`
 		],
 		datasets: [
 			{
-				label: 'Total Energy',
+				label: 'Total Statistics',
 				minBarLength: 10,
 				data: [
 					requestData.totalProduction.values[requestData.totalProduction.values.length - 1],
@@ -319,6 +295,69 @@ async function updateCharts() {
 			},
 		]
 	};
+	
+	let dataDailyTotal = {
+		labels: requestData.batteryPower.labels,
+		datasets: [
+			{
+				label: `Production`,
+				data: requestData.dailyProduction.values,
+				backgroundColor: [
+					'rgba(54, 162, 235, 0.2)',
+				],
+				borderColor: [
+					'rgba(54, 162, 235, 1)',
+				],
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10,
+				stack: 'Stack 1',
+			},
+			{
+				label: `Battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
+				data: requestData.dailyBatteryCharge.values,
+				backgroundColor: [
+					'rgba(255, 206, 86, 0.2)',
+				],
+				borderColor: [
+					'rgba(255, 206, 86, 1)',
+				],
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10,
+				stack: 'Stack 1',
+			},
+			{
+				label: `Battery discharge ${requestData.dailyBatteryDischarge.unitOfMeasurement}`,
+				data: requestData.dailyBatteryDischarge.values,
+				backgroundColor: [
+					'rgba(75, 192, 192, 0.2)',
+				],
+				borderColor: [
+					'rgba(75, 192, 192, 1)',
+				],
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10,
+				stack: 'Stack 1',
+			},
+			{
+				label: `Consumption`,
+				data: requestData.dailyLoadConsumption.values,
+				backgroundColor: [
+					'rgba(153, 102, 255, 0.2)',
+				],
+				borderColor: [
+					'rgba(153, 102, 255, 1)',
+				],
+				borderWidth: 1,
+				pointRadius: 1,
+				hitRadius: 10,
+				stack: 'Stack 1',
+			}
+		]
+	};
+
 
 
 // Create charts if they don't exist, otherwise update them
@@ -348,21 +387,40 @@ async function updateCharts() {
 				scales: {
 					y: {
 						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Wh'
+						}
+					}
+				}
+			}
+		});
+		
+		dailyTotalChart = new Chart(dailyTotalChartContext, {
+			type: 'bar',
+			data: dataDailyTotal,
+			options: {
+				scales: {
+					y: {
+						beginAtZero: false,
 					}
 				}
 			}
 		});
 	} else {
-		updateChartData(dataDaily, dataTotal);
+		updateChartData(dataDaily, dataTotal, dataDailyTotal);
 	}
 }
 
-function updateChartData(dataDaily, dataTotal) {
+function updateChartData(dataDaily, dataTotal, dataDailyTotal) {
 	dailyChart.data = dataDaily;
 	dailyChart.update();
 	
-	totalChart.data = dataTotal;
-	totalChart.update();
+	// totalChart.data = dataTotal;
+	// totalChart.update();
+	
+	dailyTotalChart.data = dataDailyTotal;
+	dailyTotalChart.update();
 }
 
 updateCharts();

@@ -3,14 +3,8 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<h6 class="display-6">Power Profile</h6>
+<h6 class="display-6">Daily info</h6>
 <canvas id="historicChartDaily" width="600" height="340"></canvas>
-
-@* <h6 class="display-6">Generation and Usage History</h6> *@
-@* <canvas id="historicChartDaily2" width="600" height="340"></canvas> *@
-
-<h6 class="display-6">Totals</h6>
-<canvas id="historicChartTotal" width="600" height="340"></canvas>
 
 <div class="btn-group" role="group" aria-label="Time period selector">
     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
@@ -34,6 +28,25 @@
 
 <br/>
 
+<h6 class="display-6">Daily Totals</h6>
+<canvas id="historicChartDailyTotals" width="600" height="340"></canvas>
+
+
+<div class="accordion" id="accordionTotals">
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading1">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+                All-time totals
+            </button>
+        </h2>
+        <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1" data-bs-parent="#accordionExample">
+            <h6 class="display-6">Total system usage values</h6>
+            <canvas id="historicChartTotal" width="600" height="340"></canvas>
+        </div>
+    </div>
+
+</div>
 
 @section scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
