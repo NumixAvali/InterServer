@@ -210,7 +210,7 @@ function populateData(response, data) {
 
 async function updateCharts() {
 	let requestData = await getData()
-	console.log(requestData)
+	// console.log(requestData)
 
 	// Define chart data
 	let dataDaily = {
@@ -315,7 +315,7 @@ async function updateCharts() {
 			},
 			{
 				label: `Battery charge ${requestData.dailyBatteryCharge.unitOfMeasurement}`,
-				data: requestData.dailyBatteryCharge.values,
+				data: makeAllNegative(requestData.dailyBatteryCharge.values),
 				backgroundColor: [
 					'rgba(255, 206, 86, 0.2)',
 				],
@@ -343,7 +343,7 @@ async function updateCharts() {
 			},
 			{
 				label: `Consumption`,
-				data: requestData.dailyLoadConsumption.values,
+				data: makeAllNegative(requestData.dailyLoadConsumption.values),
 				backgroundColor: [
 					'rgba(153, 102, 255, 0.2)',
 				],
@@ -403,6 +403,10 @@ async function updateCharts() {
 				scales: {
 					y: {
 						beginAtZero: false,
+						title: {
+							display: true,
+							text: 'kWh'
+						}
 					}
 				}
 			}
@@ -421,6 +425,10 @@ function updateChartData(dataDaily, dataTotal, dataDailyTotal) {
 	
 	dailyTotalChart.data = dataDailyTotal;
 	dailyTotalChart.update();
+}
+
+function makeAllNegative(arr) {
+	return arr.map(value => -value);
 }
 
 updateCharts();
