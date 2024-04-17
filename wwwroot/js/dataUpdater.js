@@ -439,11 +439,11 @@ function populateOpts() {
 			divisions: 4,
 			divWidth: 1.1,
 			divLength: 0.5,
-			divColor: savedTheme === 'light' ? '#333333' : '#eee',
+			divColor: savedTheme === 'light' ? '#333333' : '#fff',
 			subDivisions: 5,
 			subLength: 0.3,
 			subWidth: 0.6,
-			subColor: savedTheme === 'light' ? '#666666' : '#888'
+			subColor: savedTheme === 'light' ? '#666666' : '#eee'
 		},
 	};
 }
