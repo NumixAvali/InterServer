@@ -14,34 +14,115 @@
     </ul>
 </nav>
 
+<hr/>
 <section id="ApiSection">
-    <h3>Endpoints</h3><br/>
-    
-    <h4>1. Test Endpoint</h4>
+    <h2 class="display-6">Endpoints</h2><br/>
+
+    <h5>1. Test Endpoint</h5>
     <p>
         <strong>Endpoint:</strong> /api/v1/test<br>
         <strong>Method:</strong> GET<br>
         <strong>Description:</strong> This endpoint is for testing purposes.
+        <strong>Returns:</strong> Anything that's up for a test.
     </p>
-    
-    <h4>2. Get Data Endpoint</h4>
     <p>
-        <strong>Endpoint:</strong> /api/v1/get-data<br>
-        <strong>Method:</strong> GET<br>
-        <strong>Description:</strong> This endpoint retrieves data from the server.
+        <strong>Returns:</strong> Anything that's up for a test.
     </p>
-    
-    <h4>3. Get Cache Endpoint</h4>
+
+
+    <h5>2. Get Latest Cached Data Endpoint</h5>
     <p>
-        <strong>Endpoint:</strong> /api/v1/get-cache<br>
+        <strong>Endpoint:</strong> /api/v1/cache/latest<br>
         <strong>Method:</strong> GET<br>
-        <strong>Description:</strong> This endpoint retrieves data from the cache.
+        <strong>Description:</strong> This endpoint retrieves the latest data from the cache.
     </p>
+    <p>
+        <strong>Returns:</strong> <code>FrameInfo</code> type of object, where <code>Data</code> field contains yet another
+        <code>FrameInfo</code> object with actual data.
+    </p>
+
+
+    <h5>3. Get Cached Data By Timestamp Endpoint</h5>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/cache/timestamp<br>
+        <strong>Method:</strong> POST<br>
+        <strong>Description:</strong> This endpoint retrieves data from the cache by a specific timestamp. The timestamp should be sent in the request body.
+    </p>
+    <p>
+        <strong>Required fields:</strong>
+        <ul>
+            <li>
+                <code>"timestamp": 1709216936</code>
+            </li>
+            <li>
+                <code>"token": "your-token-here"</code>
+            </li>
+        </ul>
+    </p>
+    <p>
+        <strong>Returns:</strong> A <code>FrameInfo</code> type of object, where the <code>Data</code> field contains another nested <code>FrameInfo</code> object with actual data from the specified period.
+    </p>
+
+    <h5>4. Get Current Data Endpoint</h5>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/data/current<br>
+        <strong>Method:</strong> GET<br>
+        <strong>Description:</strong> This endpoint retrieves the current data from the server.
+    </p>
+    <p>
+        <strong>Returns:</strong> A <code>FrameInfo</code> type of object with current data directly from the inverter.
+        Warning: <i>execution takes longer than working with cache, and might produce unexpected hiccups.</i>
+    </p>
+
+
+    <h5>5. Get Cached Data Range Endpoint</h5>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/cache/timestamp-range<br>
+        <strong>Method:</strong> POST<br>
+        <strong>Description:</strong> This endpoint retrieves a range of data from the cache. The start and end timestamps should be sent in the request body.
+    </p>
+    <p>
+        <strong>Required fields:</strong>
+        <ul>
+            <li>
+                <code>"timestampStart": 1709216809</code>
+            </li>
+            <li>
+                <code>"timestampEnd": 1709216936</code>
+            </li>
+            <li>
+                <code>"token": "your-token-here"</code>
+            </li>
+        </ul>
+    </p>
+    <p>
+        <strong>Returns:</strong> A <code>FrameInfo</code> type of object, where the <code>Data</code> field contains another nested <code>FrameInfo</code> object with actual data from the specified period.
+    </p>
+
+    <h5>6. Get All Cached Data Endpoint</h5>
+    <p>
+        <strong>Endpoint:</strong> /api/v1/cache/all<br>
+        <strong>Method:</strong> POST<br>
+        <strong>Description:</strong> This endpoint retrieves all data from the cache.
+    </p>
+    <p>
+        <strong>Required fields:</strong>
+        <ul>
+            <li>
+                <code>"token": "your-token-here"</code>
+            </li>
+        </ul>
+    </p>
+    <p>
+        <strong>Returns:</strong> An array of <code>FrameInfo</code> type of objects.
+    </p>
+
 </section>
 
+<hr/>
 <section id="JsonSection">
-    <h3>JSON reply</h3><br/>
-    
+    <h2 class="display-6">JSON reply</h2><br/>
+
     JSON reply consists of the following fields:
     <ul>
         <li><strong>Status</strong> - The <i>ResponseType</i> field, meant to be parsed by code.</li>
@@ -110,9 +191,14 @@
     </ul>
 </section>
 
+<hr/>
 <section id="HardwareSection">
-    <h3>Supported hardware</h3><br/>
-    This section is incomplete. Current set of config files for inverters is the following:
+    <h2 class="display-6">Supported hardware</h2><br/>
+    Inverter support is defined by configuration files, and their registry address pointers. For using this project with
+    your custom inverter configuration files, put your .yaml files into <code>/InverterConfigs/</code> directory and restart
+    the project to see them in the settings dropdown menu.
+    
+    Built-in list of configuration files for inverters is the following:
     <ul>
         <li>deye_2mppt.yaml</li>
         <li>deye_4mppt.yaml</li>
@@ -136,4 +222,3 @@
 
 
 
-<!-- TODO: Add more endpoints as needed -->
