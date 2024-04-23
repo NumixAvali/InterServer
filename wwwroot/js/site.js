@@ -58,7 +58,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             success: function(response) {
                 // Handle success response
-                console.log(response);
+                // console.log(response);
             },
             error: function(xhr, status, error) {
                 alert("Error updating settings. Check console for more info.")
