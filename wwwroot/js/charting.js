@@ -230,7 +230,7 @@ async function updateCharts() {
 				hitRadius: 10
 			},
 			{
-				label: `Production`,
+				label: `Consumption`,
 				data: requestData.loadPower.values,
 				backgroundColor: [
 					'rgba(54, 162, 235, 0.2)',
@@ -243,7 +243,7 @@ async function updateCharts() {
 				hitRadius: 10
 			},
 			{
-				label: `Consumption`,
+				label: `Production`,
 				data: requestData.pvPower.values,
 				backgroundColor: [
 					'rgba(153, 102, 255, 0.2)',
